@@ -6,21 +6,327 @@
   <title>Booking API Docs</title>
   <!-- Swagger UI styles from a public CDN -->
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+  <style>
+    /* Slim banner explaining that the "server" behind Try it out is simulated in the browser */
+    .demo-banner {
+      font: 14px/1.5 system-ui, sans-serif;
+      background: #1f2933;
+      color: #f5f7fa;
+      padding: 10px 20px;
+    }
+    .demo-banner a { color: #7cc4fa; }
+    .demo-banner button {
+      margin-left: 12px;
+      background: transparent;
+      color: #f5f7fa;
+      border: 1px solid #7b8794;
+      border-radius: 4px;
+      padding: 2px 10px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
+  <div class="demo-banner">
+    Demo mode: <strong>Try it out</strong> works here against dummy data held in your browser.
+    Nothing is sent to a server and the data resets on reload.
+    <a href="app/">Open the Seated booking app</a>
+    <button type="button" id="reset-demo">Reset demo data</button>
+  </div>
+
   <!-- Swagger UI draws the documentation inside this element -->
   <div id="swagger-ui"></div>
 
   <!-- Swagger UI script and setup -->
   <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+
   <script>
+    /*
+     * Demo backend: a small in-browser copy of the real API's rules.
+     * GitHub Pages can only host static files, so there is no server for "Try it out" to call.
+     * This script replaces window.fetch for /api/v1/ requests and answers them from memory,
+     * using the same routes, status codes, validation and no-double-booking rule as the C# code.
+     */
+    (function () {
+      // Same five tables the C# database seeds
+      var TABLES = [
+        { id: 1, name: 'Window 1', capacity: 2 },
+        { id: 2, name: 'Window 2', capacity: 2 },
+        { id: 3, name: 'Booth 1', capacity: 4 },
+        { id: 4, name: 'Booth 2', capacity: 4 },
+        { id: 5, name: 'Long table', capacity: 8 }
+      ];
+      // One hour slots from 17:00 to 21:00, matching BookingRules.AllSlots
+      var ALL_SLOTS = ['17:00:00', '18:00:00', '19:00:00', '20:00:00', '21:00:00'];
+      var MAX_PAGE_SIZE = 100;
+      var bookings = [];
+
+      // Today as yyyy-mm-dd in local time
+      function todayIso() {
+        var now = new Date();
+        var month = String(now.getMonth() + 1).padStart(2, '0');
+        var day = String(now.getDate()).padStart(2, '0');
+        return now.getFullYear() + '-' + month + '-' + day;
+      }
+
+      // Creates a booking record shaped like BookingResponse
+      function makeBooking(tableId, date, slot, partySize, name, email) {
+        return {
+          id: crypto.randomUUID(),
+          diningTableId: tableId,
+          bookingDate: date,
+          slotTime: slot,
+          partySize: partySize,
+          customerName: name,
+          customerEmail: email,
+          status: 'Confirmed',
+          createdAtUtc: new Date().toISOString()
+        };
+      }
+
+      // Starting data so GET endpoints return something straight away
+      function seed() {
+        var today = todayIso();
+        bookings = [
+          makeBooking(1, today, '18:00:00', 2, 'Ava Martin', 'ava@example.com'),
+          makeBooking(3, today, '19:00:00', 4, 'Noah Patel', 'noah@example.com'),
+          makeBooking(5, today, '20:00:00', 7, 'Mia Chen', 'mia@example.com')
+        ];
+      }
+      seed();
+      window.resetDemoData = seed;
+
+      // Builds a JSON Response. Errors use the problem+json type like ASP.NET does.
+      function reply(status, body, extraHeaders) {
+        var headers = Object.assign(
+          { 'Content-Type': status >= 400 ? 'application/problem+json' : 'application/json' },
+          extraHeaders || {}
+        );
+        var text = body === undefined ? null : JSON.stringify(body);
+        return new Response(text, { status: status, headers: headers });
+      }
+
+      function problem(status, title, detail) {
+        return reply(status, { title: title, status: status, detail: detail });
+      }
+
+      // 400 body with a field to messages map, like Results.ValidationProblem
+      function validationProblem(errors) {
+        return reply(400, {
+          type: 'https://tools.ietf.org/html/rfc9110#section-15.5.1',
+          title: 'One or more validation errors occurred.',
+          status: 400,
+          errors: errors
+        });
+      }
+
+      // Accepts 18:00 or 18:00:00 and returns the HH:mm:ss form, or null when invalid
+      function normaliseTime(value) {
+        var match = /^(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(String(value || ''));
+        return match ? match[1] + ':' + match[2] + ':' + (match[3] || '00') : null;
+      }
+
+      function isIsoDate(value) {
+        return /^\d{4}-\d{2}-\d{2}$/.test(String(value || '')) && !isNaN(new Date(value));
+      }
+
+      var GUID_PATTERN = '[0-9a-fA-F-]{36}';
+
+      // Mirrors BookingValidator.Validate
+      function validate(request, table) {
+        var errors = {};
+        if (!isIsoDate(request.bookingDate)) {
+          errors.BookingDate = ['A valid date such as 2026-12-01 is required.'];
+        } else if (request.bookingDate < todayIso()) {
+          errors.BookingDate = ['Booking date cannot be in the past.'];
+        }
+        if (ALL_SLOTS.indexOf(request.slotTime) === -1) {
+          errors.SlotTime = ['Slot time must be on the hour between 17:00:00 and 21:00:00.'];
+        }
+        if (!Number.isInteger(request.partySize) || request.partySize < 1 || request.partySize > table.capacity) {
+          errors.PartySize = ['Party size must be between 1 and ' + table.capacity + " for table '" + table.name + "'."];
+        }
+        var name = typeof request.customerName === 'string' ? request.customerName.trim() : '';
+        if (!name || name.length > 100) {
+          errors.CustomerName = ['Customer name is required and must be 100 characters or fewer.'];
+        }
+        var email = request.customerEmail;
+        if (typeof email !== 'string' || email.length > 254 || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email)) {
+          errors.CustomerEmail = ['A valid email address is required.'];
+        }
+        return errors;
+      }
+
+      // Routes each request to the matching handler and returns a Response
+      function handle(method, url, bodyText) {
+        var path = url.pathname.replace(/\/+$/, '');
+        var query = url.searchParams;
+        var match;
+
+        // GET /api/v1/tables
+        if (method === 'GET' && path.endsWith('/api/v1/tables')) {
+          return reply(200, TABLES);
+        }
+
+        // GET /api/v1/tables/{tableId}/availability?date=
+        match = /\/api\/v1\/tables\/([^/]+)\/availability$/.exec(path);
+        if (match && method === 'GET') {
+          var date = query.get('date');
+          if (!date) {
+            return validationProblem({ date: ["Query parameter 'date' is required, for example ?date=2026-12-01."] });
+          }
+          var tableId = Number(match[1]);
+          if (!TABLES.some(function (t) { return t.id === tableId; })) {
+            return problem(404, 'Table not found');
+          }
+          var taken = bookings
+            .filter(function (b) { return b.diningTableId === tableId && b.bookingDate === date && b.status === 'Confirmed'; })
+            .map(function (b) { return b.slotTime; });
+          return reply(200, {
+            diningTableId: tableId,
+            date: date,
+            availableSlots: ALL_SLOTS.filter(function (slot) { return taken.indexOf(slot) === -1; })
+          });
+        }
+
+        // POST /api/v1/bookings
+        if (method === 'POST' && path.endsWith('/api/v1/bookings')) {
+          var request;
+          try {
+            request = JSON.parse(bodyText || '{}');
+          } catch (parseError) {
+            return problem(400, 'Invalid JSON body');
+          }
+          request.slotTime = normaliseTime(request.slotTime);
+          var table = TABLES.filter(function (t) { return t.id === request.diningTableId; })[0];
+          if (!table) {
+            return validationProblem({ DiningTableId: ['Dining table does not exist.'] });
+          }
+          var errors = validate(request, table);
+          if (Object.keys(errors).length > 0) {
+            return validationProblem(errors);
+          }
+          var clash = bookings.some(function (b) {
+            return b.diningTableId === request.diningTableId && b.bookingDate === request.bookingDate
+              && b.slotTime === request.slotTime && b.status === 'Confirmed';
+          });
+          if (clash) {
+            return problem(409, 'Slot already booked',
+              'Table ' + request.diningTableId + ' is already booked on ' + request.bookingDate
+              + ' at ' + request.slotTime.slice(0, 5) + '.');
+          }
+          var created = makeBooking(request.diningTableId, request.bookingDate, request.slotTime,
+            request.partySize, request.customerName.trim(), request.customerEmail);
+          bookings.push(created);
+          return reply(201, created, { Location: '/api/v1/bookings/' + created.id });
+        }
+
+        // GET /api/v1/bookings?date=&page=&pageSize=
+        if (method === 'GET' && path.endsWith('/api/v1/bookings')) {
+          var pageNumber = query.has('page') ? Number(query.get('page')) : 1;
+          var pageSize = query.has('pageSize') ? Number(query.get('pageSize')) : 20;
+          if (!(pageNumber >= 1) || !(pageSize >= 1) || pageSize > MAX_PAGE_SIZE) {
+            return validationProblem({ paging: ['page must be 1 or more and pageSize must be between 1 and ' + MAX_PAGE_SIZE + '.'] });
+          }
+          var dateFilter = query.get('date');
+          var filtered = bookings
+            .filter(function (b) { return !dateFilter || b.bookingDate === dateFilter; })
+            .sort(function (a, b) {
+              return (a.bookingDate + a.slotTime + a.id).localeCompare(b.bookingDate + b.slotTime + b.id);
+            });
+          var start = (pageNumber - 1) * pageSize;
+          return reply(200, {
+            items: filtered.slice(start, start + pageSize),
+            page: pageNumber,
+            pageSize: pageSize,
+            totalCount: filtered.length
+          });
+        }
+
+        // GET and DELETE /api/v1/bookings/{bookingId}
+        match = new RegExp('/api/v1/bookings/(' + GUID_PATTERN + ')$').exec(path);
+        if (match) {
+          var found = bookings.filter(function (b) { return b.id.toLowerCase() === match[1].toLowerCase(); })[0];
+          if (!found) {
+            return problem(404, 'Booking not found');
+          }
+          if (method === 'GET') {
+            return reply(200, found);
+          }
+          if (method === 'DELETE') {
+            // Soft delete: the record stays for history and the slot is freed
+            found.status = 'Cancelled';
+            return reply(204);
+          }
+        }
+
+        return problem(404, 'Not found');
+      }
+
+      // Swap in the demo backend for API calls only. Everything else (CSS, openapi.json) is untouched.
+      var realFetch = window.fetch.bind(window);
+      window.fetch = function (input, init) {
+        var request = input instanceof Request ? input : null;
+        var url = new URL(request ? request.url : String(input), window.location.href);
+        if (url.pathname.indexOf('/api/v1/') === -1) {
+          return realFetch(input, init);
+        }
+        var method = ((init && init.method) || (request && request.method) || 'GET').toUpperCase();
+        var bodyPromise = init && init.body !== undefined
+          ? Promise.resolve(init.body)
+          : (request ? request.text() : Promise.resolve(null));
+        return bodyPromise.then(function (bodyText) {
+          return handle(method, url, typeof bodyText === 'string' ? bodyText : null);
+        });
+      };
+    })();
+
+    // Tomorrow as yyyy-mm-dd, used for a booking example that always passes the "not in the past" rule
+    function tomorrowIso() {
+      var next = new Date();
+      next.setDate(next.getDate() + 1);
+      return next.getFullYear() + '-' + String(next.getMonth() + 1).padStart(2, '0') + '-' + String(next.getDate()).padStart(2, '0');
+    }
+
+    // Replaces the auto-generated placeholder values (such as slotTime 22:58:46.573Z) with valid ones,
+    // so the pre-filled request body works the first time you press Execute
+    function addExamples(spec) {
+      var request = spec.components && spec.components.schemas && spec.components.schemas.CreateBookingRequest;
+      if (request && request.properties) {
+        var examples = {
+          diningTableId: 3,
+          bookingDate: tomorrowIso(),
+          slotTime: '18:00:00',
+          partySize: 2,
+          customerName: 'Tay Rechichi',
+          customerEmail: 'guest@example.com'
+        };
+        Object.keys(examples).forEach(function (field) {
+          if (request.properties[field]) {
+            request.properties[field].example = examples[field];
+          }
+        });
+      }
+      return spec;
+    }
+
     window.addEventListener('load', function () {
-      window.ui = SwaggerUIBundle({
-        // openapi.json is downloaded from the running API by the CI workflow
-        url: 'openapi.json',
-        dom_id: '#swagger-ui',
-        // This is a static docs site with no live server behind it, so hide the "Try it out" buttons
-        supportedSubmitMethods: []
+      // openapi.json is downloaded from the running API by the CI workflow
+      fetch('openapi.json')
+        .then(function (response) { return response.json(); })
+        .then(function (spec) {
+          window.ui = SwaggerUIBundle({
+            spec: addExamples(spec),
+            dom_id: '#swagger-ui',
+            // Try it out is switched on from the start: calls are answered by the demo backend above
+            tryItOutEnabled: true,
+            // Show the Schemas section so the models are easy to find
+            defaultModelsExpandDepth: 1
+          });
+        });
+
+      document.getElementById('reset-demo').addEventListener('click', function () {
+        window.resetDemoData();
       });
     });
   </script>
