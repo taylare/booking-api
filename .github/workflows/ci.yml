@@ -151,6 +151,10 @@ jobs:
   deploy:
     needs: docs
     runs-on: ubuntu-latest
+    # One Pages deployment at a time; a new run waits instead of colliding
+    concurrency:
+      group: github-pages-deploy
+      cancel-in-progress: false
     # Permissions the Pages deployment needs
     permissions:
       pages: write
