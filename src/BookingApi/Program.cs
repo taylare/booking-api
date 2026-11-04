@@ -43,6 +43,36 @@ await DatabaseInitializer.EnsureCreatedWithRetryAsync(app.Services, startupLogge
 // OpenAPI document served at /openapi/v1.json, used to build the Swagger docs site
 app.MapOpenApi();
 
+// In development, serve an interactive Swagger UI at /docs so you can try the
+// endpoints from a browser. It is same-origin with the API, so "Try it out"
+// works with no CORS setup. Not exposed in production.
+if (app.Environment.IsDevelopment())
+{
+    app.MapGet("/docs", () => Results.Content(
+        """
+        <!doctype html>
+        <html lang="en">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>Booking API - Swagger UI</title>
+          <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+        </head>
+        <body>
+          <div id="swagger-ui"></div>
+          <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+          <script>
+            window.ui = SwaggerUIBundle({
+              url: '/openapi/v1.json',
+              dom_id: '#swagger-ui'
+            });
+          </script>
+        </body>
+        </html>
+        """,
+        "text/html"));
+}
+
 // All business endpoints share the /api/v1 prefix, so a future v2 can live alongside
 app.MapGroup("/api/v1")
     .MapTableEndpoints()
