@@ -4,7 +4,7 @@ A small RESTful API for booking restaurant tables, built with C#, ASP.NET Core a
 It is a portfolio demo with fake data, designed to show API design, database constraints,
 concurrency handling, automated testing and documentation.
 
-![CI](https://github.com/YOUR-USERNAME/YOUR-REPO/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/taylare/booking-api/actions/workflows/ci.yml/badge.svg)
 
 **API docs (Swagger):** `https://YOUR-USERNAME.github.io/YOUR-REPO/`
 
