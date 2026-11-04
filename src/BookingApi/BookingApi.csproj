@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- Target framework and language settings -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>BookingApi</RootNamespace>
+    <!-- Nullable reference types make the compiler flag possible null mistakes -->
+    <Nullable>enable</Nullable>
+    <!-- Implicit usings add common namespaces (System, System.Linq, and so on) automatically -->
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <!-- The two NuGet packages the API needs -->
+  <ItemGroup>
+    <!-- Generates the OpenAPI document that the Swagger docs page reads -->
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.*" />
+    <!-- PostgreSQL provider for Entity Framework Core (brings EF Core in with it) -->
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.*" />
+  </ItemGroup>
+
+</Project>
