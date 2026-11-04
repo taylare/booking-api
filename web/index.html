@@ -5,189 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Seated</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Figtree:wght@400;500;600;700&display=swap">
-<style>
-  html, body { margin: 0; }
-  img { max-width: 100%; }
-  [hidden] { display: none !important; }
-
-  :root {
-    --bg: #f3f2f0;
-    --surface: #ffffff;
-    --surface-2: #edeae6;
-    --fg: #1d1c1a;
-    --muted: #6e6a63;
-    --faint: #9a958c;
-    --border: #e6e2db;
-    --hair: #efece7;
-    --accent: #6e2733;
-    --accent-ink: #551d28;
-    --accent-soft: #f1e2e4;
-    --ok: #3f7d5f;
-    --floor: #f7f5f1;
-    --chair: #ded7cc;
-    --shadow-sm: 0 1px 2px rgba(30, 20, 15, 0.05);
-    --shadow: 0 16px 48px rgba(40, 25, 18, 0.13);
-    --radius: 14px;
-    --font-display: "Fraunces", Georgia, serif;
-    --font-ui: "Figtree", "Segoe UI", system-ui, sans-serif;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #141210; --surface: #1d1a17; --surface-2: #252118; --fg: #efeae3; --muted: #a8a197; --faint: #7c766c;
-      --border: #332e27; --hair: #2a2620; --accent: #cf7382; --accent-ink: #e3a1ac; --accent-soft: #38242a;
-      --ok: #74c398; --floor: #1a1713; --chair: #463d33;
-      --shadow-sm: 0 1px 2px rgba(0,0,0,0.3); --shadow: 0 16px 48px rgba(0, 0, 0, 0.5); color-scheme: dark;
-    }
-  }
-  :root[data-theme="dark"] {
-    --bg: #141210; --surface: #1d1a17; --surface-2: #252118; --fg: #efeae3; --muted: #a8a197; --faint: #7c766c;
-    --border: #332e27; --hair: #2a2620; --accent: #cf7382; --accent-ink: #e3a1ac; --accent-soft: #38242a;
-    --ok: #74c398; --floor: #1a1713; --chair: #463d33;
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3); --shadow: 0 16px 48px rgba(0, 0, 0, 0.5); color-scheme: dark;
-  }
-
-  * { box-sizing: border-box; }
-  body { background: var(--bg); color: var(--fg); font-family: var(--font-ui); line-height: 1.5; letter-spacing: -0.005em; }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
-
-  .wrap { max-width: 1040px; margin: 0 auto; padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px)); padding-block: 0; }
-
-  header.top { padding-block: clamp(1.8rem, 4vw, 2.6rem) 0.4rem; }
-  .brand-row { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
-  .wordmark { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.75rem, 4.5vw, 2.4rem); letter-spacing: -0.02em; margin: 0; line-height: 1; display: inline-flex; align-items: center; gap: 0.48rem; }
-  .wordmark .dot { width: 0.42em; height: 0.42em; border-radius: 50%; background: var(--accent); display: inline-block; }
-  .demo-tag { font-size: 0.64rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); background: var(--surface-2); border: 1px solid var(--border); padding: 0.3em 0.65em; border-radius: 999px; }
-  .subtitle { color: var(--muted); margin: 0.6rem 0 0; font-size: 0.96rem; max-width: 60ch; }
-  .subtitle a { color: var(--accent-ink); text-underline-offset: 2px; }
-
-  .datebar { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 1.4rem; padding: 0.6rem 0.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
-  .datebar .daylabel { font-weight: 600; font-size: 1rem; margin-right: auto; padding-left: 0.3rem; }
-  .datebar .daylabel small { display: block; font-size: 0.74rem; font-weight: 500; color: var(--faint); }
-  button { font-family: var(--font-ui); font-size: 0.88rem; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--fg); padding: 0.48rem 0.8rem; border-radius: 10px; font-weight: 600; transition: background 0.15s, border-color 0.15s, color 0.15s; }
-  button:hover { border-color: var(--faint); background: var(--surface-2); }
-  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-  :root[data-theme="dark"] .btn-primary, :root:not([data-theme="light"]) .btn-primary { color: #1a0d10; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn-primary { color: #1a0d10; } }
-  .btn-primary:hover { background: var(--accent-ink); border-color: var(--accent-ink); color: #fff; }
-  :root[data-theme="dark"] .btn-primary:hover, :root:not([data-theme="light"]) .btn-primary:hover { color: #1a0d10; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn-primary:hover { color: #1a0d10; } }
-  input[type="date"], input[type="text"], input[type="email"], input[type="number"] { font-family: var(--font-ui); font-size: 0.94rem; color: var(--fg); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.55rem 0.7rem; width: 100%; }
-  input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
-  .datebar input[type="date"] { width: auto; border-color: var(--hair); background: var(--surface-2); }
-
-  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin-top: 0.8rem; }
-  @media (max-width: 520px) { .tiles { grid-template-columns: 1fr; } }
-  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.15rem; box-shadow: var(--shadow-sm); }
-  .tile .big { font-family: var(--font-display); font-size: 2rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
-  .tile .lbl { color: var(--muted); font-size: 0.72rem; margin-top: 0.45rem; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
-
-  .controls { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin: 1.7rem 0 0.8rem; }
-  .sittings { display: flex; gap: 0.35rem; flex-wrap: wrap; align-items: center; }
-  .sittings .lead { font-size: 0.72rem; color: var(--faint); margin-right: 0.35rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
-  .slotbtn { font-variant-numeric: tabular-nums; padding: 0.4rem 0.72rem; background: var(--surface); }
-  .slotbtn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-  :root[data-theme="dark"] .slotbtn.active, :root:not([data-theme="light"]) .slotbtn.active { color: #1a0d10; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .slotbtn.active { color: #1a0d10; } }
-  .viewtoggle { display: inline-flex; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 3px; }
-  .viewtoggle button { border: none; background: transparent; padding: 0.4rem 0.8rem; border-radius: 8px; color: var(--muted); }
-  .viewtoggle button:hover { background: transparent; color: var(--fg); }
-  .viewtoggle button.active { background: var(--surface); color: var(--fg); box-shadow: var(--shadow-sm); }
-
-  .legend { display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.78rem; color: var(--muted); margin: 0 0 0.7rem; align-items: center; }
-  .legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
-  .swatch { width: 0.85rem; height: 0.85rem; border-radius: 4px; display: inline-block; }
-  .sw-free { background: var(--surface); border: 1.5px solid var(--border); }
-  .sw-booked { background: var(--accent); }
-  .sw-blocked { background: var(--surface-2); border: 1px solid var(--border); }
-
-  .room { position: relative; width: 100%; aspect-ratio: 16 / 10; border-radius: 20px; overflow: hidden; background: radial-gradient(130% 100% at 50% -10%, rgba(0,0,0,0.025), transparent 55%), var(--floor); box-shadow: inset 0 0 0 1px var(--border), inset 0 2px 20px rgba(30,20,15,0.04); }
-  .zone { position: absolute; font-size: clamp(0.52rem, 1.4vw, 0.7rem); letter-spacing: 0.18em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
-  .wall-window { position: absolute; left: 5%; right: 5%; top: 4.5%; height: 3px; border-radius: 3px; background: repeating-linear-gradient(90deg, var(--border) 0, var(--border) 26px, transparent 26px, transparent 34px); }
-  .pass { position: absolute; right: 4%; bottom: 6%; width: 15%; height: 11%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: clamp(0.46rem,1.2vw,0.64rem); letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
-  .door { position: absolute; left: 4.5%; bottom: 5%; width: 12%; height: 3px; border-radius: 3px; background: var(--accent); opacity: 0.5; }
-
-  .table { position: absolute; display: flex; flex-direction: column; padding: 0; background: transparent; border: none; cursor: pointer; }
-  .table .chairs { display: flex; justify-content: center; align-items: center; gap: 8%; height: clamp(6px, 1.5vw, 11px); flex-shrink: 0; }
-  .table .chair { width: 12%; max-width: 14px; height: 100%; background: var(--chair); border-radius: 3px; }
-  .table .body { flex: 1; min-height: 0; margin: 5% 0; border-radius: 12px; border: 1.5px solid var(--border); background: var(--surface); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 3px; text-align: center; transition: transform 0.14s, box-shadow 0.14s, border-color 0.14s; }
-  .table .body .nm { font-weight: 600; font-size: clamp(0.6rem, 1.45vw, 0.9rem); line-height: 1.05; }
-  .table .body .st { font-size: clamp(0.5rem, 1.2vw, 0.74rem); line-height: 1.05; color: var(--muted); display: inline-flex; align-items: center; }
-  .st-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); margin-right: 5px; flex-shrink: 0; }
-  .table.free:hover .body { transform: translateY(-2px); border-color: var(--faint); box-shadow: var(--shadow); }
-  .table.reserved .body { border-color: var(--accent); background: var(--accent); color: #fff; }
-  .table.reserved .body .st { color: rgba(255,255,255,0.88); }
-  :root[data-theme="dark"] .table.reserved .body, :root:not([data-theme="light"]) .table.reserved .body { color: #1a0d10; }
-  :root[data-theme="dark"] .table.reserved .body .st, :root:not([data-theme="light"]) .table.reserved .body .st { color: rgba(26,13,16,0.75); }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .table.reserved .body { color: #1a0d10; } :root:not([data-theme="light"]) .table.reserved .body .st { color: rgba(26,13,16,0.75); } }
-  .table.reserved:hover .body { transform: translateY(-2px); box-shadow: var(--shadow); }
-  .table.blocked { cursor: not-allowed; }
-  .table.blocked .body { border-color: var(--border); background: var(--surface-2); color: var(--faint); box-shadow: none; }
-  .table.blocked .body .st { color: var(--faint); }
-  .room.past::after { content: "Past service \2014 view only"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(120,110,100,0.12); font-weight: 600; color: var(--muted); font-size: 0.92rem; }
-
-  .grid-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-sm); }
-  table.grid { border-collapse: collapse; width: 100%; min-width: 540px; }
-  table.grid th, table.grid td { padding: 0; text-align: center; border-bottom: 1px solid var(--hair); border-right: 1px solid var(--hair); }
-  table.grid thead th { font-weight: 600; font-size: 0.8rem; color: var(--muted); padding: 0.7rem 0.4rem; background: var(--surface-2); font-variant-numeric: tabular-nums; }
-  table.grid tbody th { text-align: left; padding: 0.7rem 0.9rem; background: var(--surface-2); position: sticky; left: 0; min-width: 116px; }
-  table.grid tbody th .tname { font-weight: 600; font-size: 0.88rem; }
-  table.grid tbody th .tcap { color: var(--faint); font-size: 0.72rem; }
-  table.grid td:last-child, table.grid th:last-child { border-right: none; }
-  table.grid tbody tr:last-child th, table.grid tbody tr:last-child td { border-bottom: none; }
-  .cell { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; width: 100%; min-height: 54px; padding: 0.4rem 0.3rem; border: none; background: transparent; color: var(--faint); font-family: var(--font-ui); font-size: 0.78rem; font-weight: 500; transition: background 0.12s, color 0.12s; }
-  .cell.free { cursor: pointer; }
-  .cell.free:hover { background: var(--surface-2); color: var(--accent-ink); }
-  .cell.booked { background: var(--accent); color: #fff; cursor: pointer; }
-  :root[data-theme="dark"] .cell.booked, :root:not([data-theme="light"]) .cell.booked { color: #1a0d10; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cell.booked { color: #1a0d10; } }
-  .cell.booked .who { font-weight: 700; font-size: 0.82rem; }
-  .cell.booked .party { font-size: 0.72rem; opacity: 0.9; }
-  .cell.blocked { color: var(--faint); cursor: not-allowed; }
-
-  .list { margin-top: 1.8rem; }
-  .list h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.15rem; margin: 0 0 0.7rem; }
-  .booking-row { display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 0.75rem 0.95rem; margin-bottom: 0.5rem; box-shadow: var(--shadow-sm); }
-  .booking-row .time { font-family: var(--font-display); font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.2rem; }
-  .booking-row .meta { min-width: 0; flex: 1; }
-  .booking-row .meta b { font-weight: 600; }
-  .booking-row .meta span { color: var(--muted); font-size: 0.84rem; display: block; }
-  .booking-row .tbl { font-size: 0.76rem; color: var(--faint); letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
-  .empty { color: var(--muted); padding: 1.3rem; text-align: center; background: var(--surface); border: 1px dashed var(--border); border-radius: 12px; }
-
-  .scrim { position: fixed; inset: 0; background: rgba(20,12,8,0.42); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 40; }
-  .scrim.show { opacity: 1; pointer-events: auto; }
-  .panel { position: fixed; z-index: 50; background: var(--surface); box-shadow: var(--shadow); top: 0; right: 0; height: 100%; width: min(392px, 93vw); padding: 1.4rem; padding-top: calc(1.4rem + env(safe-area-inset-top, 0px)); padding-right: max(1.4rem, env(safe-area-inset-right, 0px)); transform: translateX(100%); transition: transform 0.25s ease; overflow-y: auto; border-left: 1px solid var(--border); }
-  .panel.show { transform: translateX(0); }
-  .panel .eyebrow { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
-  .panel h3 { font-family: var(--font-display); font-weight: 600; font-size: 1.45rem; margin: 0.25rem 0 0.1rem; }
-  .panel .slotline { color: var(--muted); margin: 0 0 1.3rem; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
-  .field { margin-bottom: 0.95rem; }
-  .field label { display: block; font-size: 0.78rem; font-weight: 600; margin-bottom: 0.35rem; letter-spacing: 0.01em; }
-  .field .hint { color: var(--faint); font-weight: 400; }
-  .field .err { color: var(--accent-ink); font-size: 0.78rem; margin-top: 0.3rem; }
-  .panel .actions { display: flex; gap: 0.6rem; margin-top: 1.3rem; }
-  .panel .actions button { flex: 1; padding: 0.6rem; }
-  .closex { position: absolute; top: calc(1rem + env(safe-area-inset-top, 0px)); right: 1rem; width: 2rem; height: 2rem; padding: 0; border-radius: 8px; font-size: 1.1rem; line-height: 1; color: var(--muted); }
-  .detail-line { display: flex; justify-content: space-between; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid var(--hair); font-size: 0.9rem; }
-  .detail-line span:first-child { color: var(--faint); }
-  .detail-line span:last-child { font-weight: 500; text-align: right; }
-  .confirmed-chip { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ok); }
-  .confirmed-chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
-  .btn-danger { background: transparent; color: var(--accent-ink); border-color: var(--border); }
-  .btn-danger:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
-
-  .toasts { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(1.2rem + env(safe-area-inset-bottom, 0px)); z-index: 60; display: flex; flex-direction: column; gap: 0.5rem; width: max-content; max-width: 90vw; }
-  .toast { background: var(--fg); color: var(--bg); padding: 0.68rem 1.05rem; border-radius: 10px; font-size: 0.88rem; font-weight: 500; box-shadow: var(--shadow); opacity: 0; transform: translateY(8px); transition: opacity 0.2s, transform 0.2s; }
-  .toast.show { opacity: 1; transform: translateY(0); }
-  .toast.warn { background: var(--accent); color: #fff; }
-  :root[data-theme="dark"] .toast.warn, :root:not([data-theme="light"]) .toast.warn { color: #1a0d10; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .toast.warn { color: #1a0d10; } }
-
-  footer.foot { padding-block: 2.2rem 3rem; color: var(--faint); font-size: 0.82rem; max-width: 72ch; }
-  footer.foot a { color: var(--accent-ink); }
-  footer.foot code { font-family: ui-monospace, Consolas, monospace; background: var(--surface-2); padding: 0.1em 0.4em; border-radius: 5px; font-size: 0.86em; }
-</style>
+<link rel="stylesheet" href="seated.css">
 </head>
 <body>
 <div class="wrap">
@@ -199,336 +17,637 @@
     <p class="subtitle">A sample reservations interface for the <a href="https://taylare.github.io/booking-api/" target="_blank" rel="noopener">Booking API</a>. Dinner service, one-hour sittings from 5 to 9pm.</p>
   </header>
 
-  <div class="datebar">
-    <div class="daylabel"><span id="dayName">&mdash;</span><small id="dayFull">&mdash;</small></div>
-    <button id="prevDay" aria-label="Previous day">&larr;</button>
-    <button id="todayBtn">Today</button>
-    <button id="nextDay" aria-label="Next day">&rarr;</button>
-    <input type="date" id="datePick" aria-label="Pick a date">
-  </div>
+  <nav class="tabs" aria-label="Sections">
+    <button class="tab active" data-tab="service">Service</button>
+    <button class="tab" data-tab="guests">Guests</button>
+    <button class="tab" data-tab="insights">Insights</button>
+    <span class="spacer"></span>
+    <a class="link-btn" href="book.html" target="_blank" rel="noopener">Guest booking page &#8599;</a>
+  </nav>
 
-  <div class="tiles">
-    <div class="tile"><div class="big" id="statCovers">0</div><div class="lbl">Covers booked tonight</div></div>
-    <div class="tile"><div class="big" id="statFree">0</div><div class="lbl">Open slots remaining</div></div>
-    <div class="tile"><div class="big" id="statTables">5</div><div class="lbl">Tables in service</div></div>
-  </div>
-
-  <div class="controls">
-    <div class="sittings" id="sittings"><span class="lead">Sitting</span></div>
-    <div class="viewtoggle" role="tablist" aria-label="View">
-      <button id="viewFloor" class="active" role="tab" aria-selected="true">Floor plan</button>
-      <button id="viewTimeline" role="tab" aria-selected="false">Timeline</button>
+  <!-- Service tab: floor plan, timeline, reservations and waitlist for one evening -->
+  <section class="tabpage" id="pageService">
+    <div class="datebar">
+      <div class="daylabel"><span id="dayName">&mdash;</span><small id="dayFull">&mdash;</small></div>
+      <button id="prevDay" aria-label="Previous day">&larr;</button>
+      <button id="todayBtn">Today</button>
+      <button id="nextDay" aria-label="Next day">&rarr;</button>
+      <input type="date" id="datePick" aria-label="Pick a date">
     </div>
-  </div>
 
-  <div class="legend">
-    <span><i class="swatch sw-free"></i> Open</span>
-    <span><i class="swatch sw-booked"></i> Reserved</span>
-    <span><i class="swatch sw-blocked"></i> Closed</span>
-  </div>
-
-  <div id="floorView">
-    <div class="room" id="room">
-      <div class="wall-window"></div>
-      <div class="zone" style="left:46%; top:8%;">Window</div>
-      <div class="pass">Pass</div>
-      <div class="door"></div>
-      <div class="zone" style="left:4.5%; bottom:8.5%;">Entrance</div>
+    <div class="tiles">
+      <div class="tile"><div class="big" id="statCovers">0</div><div class="lbl">Covers booked</div></div>
+      <div class="tile"><div class="big" id="statFree">0</div><div class="lbl">Open slots remaining</div></div>
+      <div class="tile"><div class="big" id="statWaiting">0</div><div class="lbl">On the waitlist</div></div>
     </div>
-  </div>
 
-  <div id="timelineView" hidden>
-    <div class="grid-scroll"><table class="grid" id="grid"><thead></thead><tbody></tbody></table></div>
-  </div>
+    <div class="controls">
+      <div class="sittings" id="sittings"><span class="lead">Sitting</span></div>
+      <div class="viewtoggle" role="tablist" aria-label="View">
+        <button id="viewFloor" class="active" role="tab" aria-selected="true">Floor plan</button>
+        <button id="viewTimeline" role="tab" aria-selected="false">Timeline</button>
+      </div>
+    </div>
 
-  <div class="list">
-    <h2 id="listHeading">Reservations</h2>
-    <div id="bookingList"></div>
-  </div>
+    <div class="legend">
+      <span><i class="swatch sw-free"></i> Open</span>
+      <span><i class="swatch sw-booked"></i> Reserved</span>
+      <span><i class="swatch" style="background: var(--ok)"></i> Seated</span>
+      <span><i class="swatch sw-blocked"></i> Closed</span>
+    </div>
+
+    <div id="floorView">
+      <div class="room" id="room">
+        <div class="wall-window"></div>
+        <div class="zone" style="left:46%; top:8%;">Window</div>
+        <div class="pass">Pass</div>
+        <div class="door"></div>
+        <div class="zone" style="left:4.5%; bottom:8.5%;">Entrance</div>
+      </div>
+    </div>
+
+    <div id="timelineView" hidden>
+      <div class="grid-scroll"><table class="grid" id="grid"><thead></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="list">
+      <h2 id="listHeading">Reservations</h2>
+      <div id="bookingList"></div>
+    </div>
+
+    <div class="section-head">
+      <h2>Waitlist</h2>
+      <button id="addWaitlist">Add to waitlist</button>
+    </div>
+    <div id="waitlistList"></div>
+  </section>
+
+  <!-- Guests tab: everyone who has booked, with tags, notes and visit history -->
+  <section class="tabpage" id="pageGuests" hidden>
+    <div class="toolbar">
+      <input type="text" id="guestSearch" placeholder="Search guests by name or email" aria-label="Search guests">
+      <div class="filter-pills" id="guestFilters"></div>
+    </div>
+    <div class="guest-grid" id="guestGrid"></div>
+  </section>
+
+  <!-- Insights tab: how the restaurant is doing over the last week and month -->
+  <section class="tabpage" id="pageInsights" hidden>
+    <div class="tiles" id="insightTiles"></div>
+    <div class="insight-grid" id="insightCharts"></div>
+  </section>
 
   <footer class="foot">
-    <p>Self-contained demo: reservations live only in your browser and reset when you clear it. It enforces the real API's rules &mdash; one-hour slots, party sizes capped by table, no double-booking a confirmed slot, and cancelling frees the slot. It is written as a real API client: set <code>API_BASE</code> in the code to a running API and every action calls the live endpoints instead of the demo data.</p>
+    <p>Self-contained demo: bookings, guest notes and the waitlist live only in your browser and reset when you clear it. It enforces the real API's rules: one-hour slots, party sizes capped by table, no double-booking a confirmed slot, and cancelling frees the slot. The <a href="book.html">guest booking page</a> shares the same data, so a booking made there appears here straight away. <button id="resetDemo" style="margin-left: 0.4rem; padding: 0.2rem 0.6rem; font-size: 0.78rem;">Reset demo data</button></p>
   </footer>
 </div>
 
 <div class="scrim" id="scrim"></div>
-<aside class="panel" id="panel" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
+<aside class="panel" id="panel" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Details">
   <button class="closex" id="closePanel" aria-label="Close">&times;</button>
   <div id="panelBody"></div>
 </aside>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
+<script src="seated-core.js"></script>
 <script>
   "use strict";
 
-  const API_BASE = null;
+  const { TABLES, SLOTS, MAX_PARTY_SIZE, GUEST_TAGS, api, escapeHtml, prettyDate, todayISO, addDays, isPast, tableName, holdsSlot } = Seated;
 
-  const TABLES = [
-    { id: 1, name: "Window 1", capacity: 2 },
-    { id: 2, name: "Window 2", capacity: 2 },
-    { id: 3, name: "Booth 1", capacity: 4 },
-    { id: 4, name: "Booth 2", capacity: 4 },
-    { id: 5, name: "Long table", capacity: 8 }
-  ];
-  const SLOTS = ["17:00", "18:00", "19:00", "20:00", "21:00"];
-  const STORAGE_KEY = "seated-bookings-v1";
-
-  const LAYOUT = {
-    1: { left: 9,  top: 12, w: 13, h: 23 },
-    2: { left: 30, top: 12, w: 13, h: 23 },
-    3: { left: 70, top: 14, w: 17, h: 25 },
-    4: { left: 70, top: 55, w: 17, h: 25 },
-    5: { left: 23, top: 45, w: 30, h: 22 }
-  };
-
-  function toISODate(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
-  function parseISODate(s) { const p = s.split("-").map(Number); return new Date(p[0], p[1] - 1, p[2]); }
-  function todayISO() { return toISODate(new Date()); }
-  function isPast(iso) { return iso < todayISO(); }
-
-  function loadStore() {
-    try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); } catch (e) {}
-    const seed = seedBookings(); saveStore(seed); return seed;
-  }
-  function saveStore(list) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch (e) {} }
-  function seedBookings() {
-    const t = todayISO();
-    return [
-      { id: uid(), diningTableId: 1, bookingDate: t, slotTime: "17:00", partySize: 2, customerName: "Delgado", customerEmail: "delgado@example.com", status: "Confirmed" },
-      { id: uid(), diningTableId: 2, bookingDate: t, slotTime: "18:00", partySize: 2, customerName: "Chen", customerEmail: "chen@example.com", status: "Confirmed" },
-      { id: uid(), diningTableId: 3, bookingDate: t, slotTime: "19:00", partySize: 4, customerName: "Rivera", customerEmail: "rivera@example.com", status: "Confirmed" },
-      { id: uid(), diningTableId: 5, bookingDate: t, slotTime: "19:00", partySize: 7, customerName: "Okafor", customerEmail: "okafor@example.com", status: "Confirmed" },
-      { id: uid(), diningTableId: 5, bookingDate: t, slotTime: "20:00", partySize: 6, customerName: "Haddad", customerEmail: "haddad@example.com", status: "Confirmed" }
-    ];
-  }
-  function uid() { try { if (crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) {} return "id-" + Math.random().toString(36).slice(2) + Date.now().toString(36); }
-
-  let STORE = loadStore();
-  function ApiError(status, message) { this.status = status; this.message = message; }
-
-  const demoApi = {
-    async getTables() { return TABLES.slice(); },
-    async listBookings(dateISO) { return STORE.filter(b => b.bookingDate === dateISO).sort((a, b) => a.slotTime.localeCompare(b.slotTime)); },
-    async getAvailability(tableId, dateISO) {
-      const taken = STORE.filter(b => b.diningTableId === tableId && b.bookingDate === dateISO && b.status === "Confirmed").map(b => b.slotTime);
-      return SLOTS.filter(s => taken.indexOf(s) === -1);
-    },
-    async createBooking(req) {
-      const table = TABLES.find(t => t.id === req.diningTableId);
-      if (!table) throw new ApiError(400, "That table does not exist.");
-      if (isPast(req.bookingDate)) throw new ApiError(400, "You cannot book a date in the past.");
-      if (SLOTS.indexOf(req.slotTime) === -1) throw new ApiError(400, "Pick a valid one-hour slot.");
-      if (req.partySize < 1 || req.partySize > table.capacity) throw new ApiError(400, "Party of " + req.partySize + " is too large for " + table.name + " (seats " + table.capacity + ").");
-      if (!req.customerName || req.customerName.trim().length === 0) throw new ApiError(400, "A guest name is required.");
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(req.customerEmail || "")) throw new ApiError(400, "Enter a valid email address.");
-      if (STORE.some(b => b.diningTableId === req.diningTableId && b.bookingDate === req.bookingDate && b.slotTime === req.slotTime && b.status === "Confirmed")) throw new ApiError(409, "That slot was just taken.");
-      const booking = Object.assign({ id: uid(), status: "Confirmed" }, req, { customerName: req.customerName.trim() });
-      STORE.push(booking); saveStore(STORE); return booking;
-    },
-    async cancelBooking(id) { const b = STORE.find(x => x.id === id); if (b && b.status !== "Cancelled") { b.status = "Cancelled"; saveStore(STORE); } return true; }
-  };
-
-  const liveApi = {
-    async getTables() { return (await fetch(API_BASE + "/api/v1/tables")).json(); },
-    async listBookings(dateISO) {
-      const data = await (await fetch(API_BASE + "/api/v1/bookings?date=" + dateISO + "&pageSize=100")).json();
-      return (data.items || []).map(b => Object.assign({}, b, { slotTime: String(b.slotTime).slice(0, 5) }));
-    },
-    async getAvailability(tableId, dateISO) {
-      const data = await (await fetch(API_BASE + "/api/v1/tables/" + tableId + "/availability?date=" + dateISO)).json();
-      return (data.availableSlots || []).map(s => String(s).slice(0, 5));
-    },
-    async createBooking(req) {
-      const r = await fetch(API_BASE + "/api/v1/bookings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.assign({}, req, { slotTime: req.slotTime + ":00" })) });
-      if (r.status === 201) return r.json();
-      throw new ApiError(r.status, r.status === 409 ? "That slot was just taken." : "The booking was rejected.");
-    },
-    async cancelBooking(id) { await fetch(API_BASE + "/api/v1/bookings/" + id, { method: "DELETE" }); return true; }
-  };
-
-  const api = API_BASE ? liveApi : demoApi;
-
+  // Which screen state the page is in
   let currentDate = todayISO();
   let currentSlot = "19:00";
   let currentView = "floor";
-  const $ = sel => document.querySelector(sel);
-  const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  function prettyDate(iso) { const d = parseISODate(iso); return { name: dayNames[d.getDay()], full: d.getDate() + " " + monthNames[d.getMonth()] + " " + d.getFullYear() }; }
-  function tableName(id) { const t = TABLES.find(x => x.id === id); return t ? t.name : "Table " + id; }
-  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+  let currentTab = "service";
+  let guestSearchText = "";
+  let guestTagFilter = "";
 
-  (function buildSittings() {
+  // Where each table sits on the floor plan, as percentages of the room
+  const FLOOR_LAYOUT = {
+    1: { left: 9, top: 12, width: 13, height: 23 },
+    2: { left: 30, top: 12, width: 13, height: 23 },
+    3: { left: 70, top: 14, width: 17, height: 25 },
+    4: { left: 70, top: 55, width: 17, height: 25 },
+    5: { left: 23, top: 45, width: 30, height: 22 }
+  };
+
+  const STATUS_LABELS = { Confirmed: "Confirmed", Seated: "Seated", Completed: "Completed", NoShow: "No-show", Cancelled: "Cancelled" };
+
+  const $ = (selector) => document.querySelector(selector);
+
+  // Small HTML helpers
+  function statusChip(status) {
+    return "<span class='chip chip-" + status.toLowerCase() + "'>" + STATUS_LABELS[status] + "</span>";
+  }
+
+  function tagChips(tags) {
+    return tags.map((tag) => "<span class='tag tag-" + tag.toLowerCase() + "'>" + escapeHtml(tag) + "</span>").join("");
+  }
+
+  function formatNoteDate(isoTimestamp) {
+    const day = prettyDate(isoTimestamp.slice(0, 10));
+    return day.short + " " + day.full.slice(-4);
+  }
+
+  function toast(message, isWarning) {
+    const element = document.createElement("div");
+    element.className = "toast" + (isWarning ? " warn" : "");
+    element.textContent = message;
+    $("#toasts").appendChild(element);
+    requestAnimationFrame(() => element.classList.add("show"));
+    setTimeout(() => { element.classList.remove("show"); setTimeout(() => element.remove(), 250); }, 3200);
+  }
+
+  function showPanel() {
+    $("#panel").classList.add("show");
+    $("#panel").setAttribute("aria-hidden", "false");
+    $("#scrim").classList.add("show");
+  }
+
+  function hidePanel() {
+    $("#panel").classList.remove("show");
+    $("#panel").setAttribute("aria-hidden", "true");
+    $("#scrim").classList.remove("show");
+  }
+
+  // The sitting buttons are built once
+  (function buildSittingButtons() {
     const host = $("#sittings");
-    SLOTS.forEach(s => {
-      const b = document.createElement("button");
-      b.className = "slotbtn" + (s === currentSlot ? " active" : "");
-      b.textContent = s; b.dataset.slot = s;
-      b.addEventListener("click", () => { currentSlot = s; render(); });
-      host.appendChild(b);
+    SLOTS.forEach((slotTime) => {
+      const button = document.createElement("button");
+      button.className = "slotbtn" + (slotTime === currentSlot ? " active" : "");
+      button.textContent = slotTime;
+      button.dataset.slot = slotTime;
+      button.addEventListener("click", () => { currentSlot = slotTime; render(); });
+      host.appendChild(button);
     });
   })();
 
+  // Rendering: one function decides which tab to draw
   async function render() {
-    const p = prettyDate(currentDate);
-    const past = isPast(currentDate);
-    $("#dayName").textContent = (currentDate === todayISO() ? "Today · " : "") + p.name;
-    $("#dayFull").textContent = p.full;
+    document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.tab === currentTab));
+    $("#pageService").hidden = currentTab !== "service";
+    $("#pageGuests").hidden = currentTab !== "guests";
+    $("#pageInsights").hidden = currentTab !== "insights";
+
+    if (currentTab === "service") {
+      await renderService();
+    } else if (currentTab === "guests") {
+      await renderGuests();
+    } else {
+      await renderInsights();
+    }
+  }
+
+  // Service tab
+  async function renderService() {
+    const day = prettyDate(currentDate);
+    const isPastDay = isPast(currentDate);
+    $("#dayName").textContent = (currentDate === todayISO() ? "Today · " : "") + day.name;
+    $("#dayFull").textContent = day.full;
     $("#datePick").value = currentDate;
-    $("#listHeading").textContent = "Reservations — " + p.name + " " + p.full.replace(/ \d{4}$/, "");
-    document.querySelectorAll(".slotbtn").forEach(b => b.classList.toggle("active", b.dataset.slot === currentSlot));
+    $("#listHeading").textContent = "Reservations · " + day.name + " " + day.short;
+    document.querySelectorAll(".slotbtn").forEach((button) => button.classList.toggle("active", button.dataset.slot === currentSlot));
 
-    const bookings = await api.listBookings(currentDate);
-    const confirmed = bookings.filter(b => b.status === "Confirmed");
-    const byCell = {};
-    confirmed.forEach(b => { byCell[b.diningTableId + "@" + b.slotTime] = b; });
+    const [allBookings, guestMap, waitlist] = await Promise.all([api.listBookings(currentDate), api.getGuestMap(), api.listWaitlist(currentDate)]);
+    const slotHolders = allBookings.filter(holdsSlot);
 
-    let covers = 0; confirmed.forEach(b => { covers += b.partySize; });
-    $("#statCovers").textContent = covers;
-    $("#statFree").textContent = past ? 0 : (TABLES.length * SLOTS.length - confirmed.length);
-    $("#statTables").textContent = TABLES.length;
+    // Look up a booking by table and slot, for the floor plan and timeline
+    const bookingByCell = {};
+    slotHolders.forEach((booking) => { bookingByCell[booking.diningTableId + "@" + booking.slotTime] = booking; });
 
-    renderFloor(byCell, past);
-    renderTimeline(byCell, past);
-    renderList(confirmed);
+    $("#statCovers").textContent = slotHolders.reduce((total, booking) => total + booking.partySize, 0);
+    $("#statFree").textContent = isPastDay ? 0 : TABLES.length * SLOTS.length - slotHolders.length;
+    $("#statWaiting").textContent = waitlist.length;
+
+    renderFloor(bookingByCell, isPastDay);
+    renderTimeline(bookingByCell, isPastDay);
+    renderBookingList(allBookings, guestMap);
+    renderWaitlist(waitlist, isPastDay);
   }
 
-  function renderFloor(byCell, past) {
+  function renderFloor(bookingByCell, isPastDay) {
     const room = $("#room");
-    room.classList.toggle("past", past);
-    room.querySelectorAll(".table").forEach(el => el.remove());
-    TABLES.forEach(t => {
-      const pos = LAYOUT[t.id];
-      const booking = byCell[t.id + "@" + currentSlot];
-      const el = document.createElement("button");
-      el.className = "table " + (past ? "blocked" : booking ? "reserved" : "free");
-      el.style.left = pos.left + "%"; el.style.top = pos.top + "%";
-      el.style.width = pos.w + "%"; el.style.height = pos.h + "%";
-      const topChairs = Math.ceil(t.capacity / 2), botChairs = Math.floor(t.capacity / 2);
-      const chairRow = n => "<div class='chairs'>" + Array.from({ length: n }).map(() => "<div class='chair'></div>").join("") + "</div>";
-      let status;
-      if (past) status = "Closed";
-      else if (booking) status = escapeHtml(booking.customerName) + " · " + booking.partySize;
-      else status = "<span class='st-dot'></span>" + t.capacity + " seats";
-      el.innerHTML = chairRow(topChairs) +
-        "<div class='body'><span class='nm'>" + escapeHtml(t.name) + "</span><span class='st'>" + status + "</span></div>" +
-        chairRow(botChairs);
-      if (!past) el.addEventListener("click", () => booking ? openDetail(booking.id) : openBookingForm(t.id, currentSlot));
-      room.appendChild(el);
+    room.classList.toggle("past", isPastDay);
+    room.querySelectorAll(".table").forEach((element) => element.remove());
+
+    TABLES.forEach((table) => {
+      const position = FLOOR_LAYOUT[table.id];
+      const booking = bookingByCell[table.id + "@" + currentSlot];
+      const element = document.createElement("button");
+
+      let stateClass = "free";
+      if (isPastDay) {
+        stateClass = "blocked";
+      } else if (booking) {
+        stateClass = booking.status === "Seated" ? "seated" : "reserved";
+      }
+      element.className = "table " + stateClass;
+      element.style.left = position.left + "%";
+      element.style.top = position.top + "%";
+      element.style.width = position.width + "%";
+      element.style.height = position.height + "%";
+
+      const chairsOnTop = Math.ceil(table.capacity / 2);
+      const chairsOnBottom = Math.floor(table.capacity / 2);
+      const chairRow = (count) => "<div class='chairs'>" + "<div class='chair'></div>".repeat(count) + "</div>";
+
+      let statusText;
+      if (isPastDay) {
+        statusText = "Closed";
+      } else if (booking) {
+        statusText = escapeHtml(booking.customerName.split(" ").pop()) + " · " + booking.partySize;
+      } else {
+        statusText = "<span class='st-dot'></span>" + table.capacity + " seats";
+      }
+
+      element.innerHTML = chairRow(chairsOnTop)
+        + "<div class='body'><span class='nm'>" + escapeHtml(table.name) + "</span><span class='st'>" + statusText + "</span></div>"
+        + chairRow(chairsOnBottom);
+
+      if (!isPastDay) {
+        element.addEventListener("click", () => booking ? openBookingDetail(booking.id) : openBookingForm(table.id, currentSlot));
+      }
+      room.appendChild(element);
     });
   }
 
-  function renderTimeline(byCell, past) {
-    let thead = "<tr><th>Table</th>"; SLOTS.forEach(s => { thead += "<th>" + s + "</th>"; }); thead += "</tr>";
-    $("#grid thead").innerHTML = thead;
-    let body = "";
-    TABLES.forEach(t => {
-      body += "<tr><th><div class='tname'>" + escapeHtml(t.name) + "</div><div class='tcap'>seats " + t.capacity + "</div></th>";
-      SLOTS.forEach(s => {
-        const booking = byCell[t.id + "@" + s];
-        if (booking) body += "<td><button class='cell booked' data-book='" + booking.id + "'><span class='who'>" + escapeHtml(booking.customerName) + "</span><span class='party'>party of " + booking.partySize + "</span></button></td>";
-        else if (past) body += "<td><div class='cell blocked'>—</div></td>";
-        else body += "<td><button class='cell free' data-table='" + t.id + "' data-slot='" + s + "'>+ book</button></td>";
+  function renderTimeline(bookingByCell, isPastDay) {
+    let headerHtml = "<tr><th>Table</th>";
+    SLOTS.forEach((slotTime) => { headerHtml += "<th>" + slotTime + "</th>"; });
+    $("#grid thead").innerHTML = headerHtml + "</tr>";
+
+    let bodyHtml = "";
+    TABLES.forEach((table) => {
+      bodyHtml += "<tr><th><div class='tname'>" + escapeHtml(table.name) + "</div><div class='tcap'>seats " + table.capacity + "</div></th>";
+      SLOTS.forEach((slotTime) => {
+        const booking = bookingByCell[table.id + "@" + slotTime];
+        if (booking) {
+          const cellClass = booking.status === "Seated" ? "seated" : booking.status === "Completed" ? "completed" : "booked";
+          bodyHtml += "<td><button class='cell " + cellClass + "' data-booking='" + booking.id + "'><span class='who'>" + escapeHtml(booking.customerName.split(" ").pop()) + "</span><span class='party'>party of " + booking.partySize + "</span></button></td>";
+        } else if (isPastDay) {
+          bodyHtml += "<td><div class='cell blocked'>-</div></td>";
+        } else {
+          bodyHtml += "<td><button class='cell free' data-table='" + table.id + "' data-slot='" + slotTime + "'>+ book</button></td>";
+        }
       });
-      body += "</tr>";
+      bodyHtml += "</tr>";
     });
-    $("#grid tbody").innerHTML = body;
-    $("#grid").querySelectorAll(".cell.free").forEach(c => c.addEventListener("click", () => openBookingForm(Number(c.dataset.table), c.dataset.slot)));
-    $("#grid").querySelectorAll(".cell.booked").forEach(c => c.addEventListener("click", () => openDetail(c.dataset.book)));
+    $("#grid tbody").innerHTML = bodyHtml;
+
+    $("#grid").querySelectorAll(".cell.free").forEach((cell) => cell.addEventListener("click", () => openBookingForm(Number(cell.dataset.table), cell.dataset.slot)));
+    $("#grid").querySelectorAll("[data-booking]").forEach((cell) => cell.addEventListener("click", () => openBookingDetail(cell.dataset.booking)));
   }
 
-  function renderList(confirmed) {
+  function renderBookingList(allBookings, guestMap) {
     const host = $("#bookingList");
-    if (!confirmed.length) { host.innerHTML = "<div class='empty'>No reservations for this evening yet.</div>"; return; }
-    host.innerHTML = confirmed.slice().sort((a, b) => a.slotTime.localeCompare(b.slotTime)).map(b =>
-      "<div class='booking-row'><div class='time'>" + b.slotTime + "</div>" +
-      "<div class='meta'><b>" + escapeHtml(b.customerName) + "</b><span>party of " + b.partySize + " · " + escapeHtml(b.customerEmail) + "</span></div>" +
-      "<div class='tbl'>" + escapeHtml(tableName(b.diningTableId)) + "</div>" +
-      "<button data-book='" + b.id + "'>Manage</button></div>"
-    ).join("");
-    host.querySelectorAll("[data-book]").forEach(btn => btn.addEventListener("click", () => openDetail(btn.getAttribute("data-book"))));
+    if (!allBookings.length) {
+      host.innerHTML = "<div class='empty'>No reservations for this evening yet.</div>";
+      return;
+    }
+    host.innerHTML = allBookings.map((booking) => {
+      const guest = guestMap[booking.customerEmail];
+      const noteCount = guest ? guest.notes.length : 0;
+      const isFinished = !holdsSlot(booking) || booking.status === "Completed";
+      return "<div class='booking-row" + (booking.status === "NoShow" || booking.status === "Cancelled" ? " dimmed" : "") + "'>"
+        + "<div class='time'>" + booking.slotTime + "</div>"
+        + "<div class='meta'><div class='name-line'><b>" + escapeHtml(booking.customerName) + "</b>" + (guest ? tagChips(guest.tags) : "") + "</div>"
+        + "<span>party of " + booking.partySize + " · " + escapeHtml(booking.customerEmail) + (noteCount ? " · " + noteCount + (noteCount === 1 ? " note" : " notes") : "") + "</span></div>"
+        + "<div class='tbl'>" + escapeHtml(tableName(booking.diningTableId)) + "</div>"
+        + statusChip(booking.status)
+        + "<button data-booking='" + booking.id + "'>" + (isFinished ? "View" : "Manage") + "</button></div>";
+    }).join("");
+    host.querySelectorAll("[data-booking]").forEach((button) => button.addEventListener("click", () => openBookingDetail(button.dataset.booking)));
   }
 
-  function showPanel() { $("#panel").classList.add("show"); $("#panel").setAttribute("aria-hidden", "false"); $("#scrim").classList.add("show"); }
-  function hidePanel() { $("#panel").classList.remove("show"); $("#panel").setAttribute("aria-hidden", "true"); $("#scrim").classList.remove("show"); }
+  function renderWaitlist(waitlist, isPastDay) {
+    const host = $("#waitlistList");
+    $("#addWaitlist").disabled = isPastDay;
+    if (!waitlist.length) {
+      host.innerHTML = "<div class='empty'>" + (isPastDay ? "The waitlist is closed for past dates." : "Nobody is waiting. Add a guest when a sitting is full.") + "</div>";
+      return;
+    }
+    host.innerHTML = waitlist.map((entry) =>
+      "<div class='booking-row'>"
+      + "<div class='time'>" + (entry.preferredSlot || "Any") + "</div>"
+      + "<div class='meta'><b>" + escapeHtml(entry.name) + "</b><span>party of " + entry.partySize + " · " + escapeHtml(entry.email) + "</span></div>"
+      + "<div class='row-actions'><button class='btn-primary' data-seat='" + entry.id + "'>Seat now</button><button data-remove='" + entry.id + "'>Remove</button></div></div>"
+    ).join("");
 
-  function openBookingForm(tableId, slot) {
-    const table = TABLES.find(t => t.id === tableId);
-    $("#panelBody").innerHTML =
-      "<div class='eyebrow'>New reservation</div>" +
-      "<h3>" + escapeHtml(table.name) + "</h3>" +
-      "<p class='slotline'>" + slot + " · " + prettyDate(currentDate).full + " · seats " + table.capacity + "</p>" +
-      "<div class='field'><label for='fName'>Guest name</label><input type='text' id='fName' maxlength='100' autocomplete='off'><div class='err' id='eName'></div></div>" +
-      "<div class='field'><label for='fEmail'>Email</label><input type='email' id='fEmail' autocomplete='off'><div class='err' id='eEmail'></div></div>" +
-      "<div class='field'><label for='fParty'>Party size <span class='hint'>(1–" + table.capacity + ")</span></label><input type='number' id='fParty' min='1' max='" + table.capacity + "' value='2'><div class='err' id='eParty'></div></div>" +
-      "<div class='actions'><button class='btn-primary' id='doBook'>Confirm reservation</button></div>";
-    showPanel();
-    setTimeout(() => { const n = $("#fName"); if (n) n.focus(); }, 60);
-    $("#doBook").addEventListener("click", async () => {
-      const req = { diningTableId: tableId, bookingDate: currentDate, slotTime: slot, partySize: Number($("#fParty").value), customerName: $("#fName").value, customerEmail: $("#fEmail").value };
-      $("#eName").textContent = ""; $("#eEmail").textContent = ""; $("#eParty").textContent = "";
+    host.querySelectorAll("[data-seat]").forEach((button) => button.addEventListener("click", async () => {
       try {
-        await api.createBooking(req);
-        hidePanel(); await render();
-        toast(req.customerName.trim() + " booked for " + slot + ".");
-      } catch (err) {
-        if (err.status === 409) { hidePanel(); await render(); toast(err.message, true); return; }
-        const m = err.message || "Could not book.";
-        if (m.toLowerCase().indexOf("party") >= 0) $("#eParty").textContent = m;
-        else if (m.toLowerCase().indexOf("email") >= 0) $("#eEmail").textContent = m;
-        else if (m.toLowerCase().indexOf("name") >= 0) $("#eName").textContent = m;
-        else toast(m, true);
+        const booking = await api.seatFromWaitlist(button.dataset.seat);
+        toast(booking.customerName + " seated for " + booking.slotTime + " at " + tableName(booking.diningTableId) + ".");
+      } catch (error) {
+        toast(error.message, true);
+      }
+      render();
+    }));
+    host.querySelectorAll("[data-remove]").forEach((button) => button.addEventListener("click", async () => {
+      await api.removeFromWaitlist(button.dataset.remove);
+      render();
+    }));
+  }
+
+  // After a table frees up, tell staff if somebody on the waitlist could take it
+  async function announceWaitlistMatch() {
+    const matches = await api.findWaitlistMatches(currentDate);
+    if (matches.length) {
+      const first = matches[0];
+      toast("Waitlist: " + first.entry.name + " (party of " + first.entry.partySize + ") can now be seated at " + first.slotTime + ".");
+    }
+  }
+
+  // Notes section, shared by the booking panel and the guest panel
+  async function renderNotes(email, container) {
+    const summary = await api.getGuest(email);
+    const notes = summary ? summary.guest.notes : [];
+    container.innerHTML =
+      (notes.length
+        ? notes.slice().reverse().map((note) =>
+            "<div class='note'>" + escapeHtml(note.text)
+            + "<div class='note-meta'><span>" + escapeHtml(note.author) + " · " + formatNoteDate(note.createdAt) + "</span>"
+            + "<button data-delete-note='" + note.id + "'>Delete</button></div></div>").join("")
+        : "<p class='note-empty'>No notes yet.</p>")
+      + "<div class='note-form'><textarea id='noteText' maxlength='500' placeholder='Add a note about this guest (allergies, preferences, occasions)'></textarea>"
+      + "<button class='btn-primary' id='saveNote'>Save note</button></div>";
+
+    container.querySelector("#saveNote").addEventListener("click", async () => {
+      try {
+        await api.addGuestNote(email, container.querySelector("#noteText").value, "Staff");
+        await renderNotes(email, container);
+        render();
+        toast("Note saved.");
+      } catch (error) {
+        toast(error.message, true);
+      }
+    });
+    container.querySelectorAll("[data-delete-note]").forEach((button) => button.addEventListener("click", async () => {
+      await api.deleteGuestNote(email, button.dataset.deleteNote);
+      await renderNotes(email, container);
+      render();
+    }));
+  }
+
+  // Panels
+  function openBookingForm(tableId, slotTime) {
+    const table = TABLES.find((candidate) => candidate.id === tableId);
+    $("#panelBody").innerHTML =
+      "<div class='eyebrow'>New reservation</div>"
+      + "<h3>" + escapeHtml(table.name) + "</h3>"
+      + "<p class='slotline'>" + slotTime + " · " + prettyDate(currentDate).full + " · seats " + table.capacity + "</p>"
+      + "<div class='field'><label for='fName'>Guest name</label><input type='text' id='fName' maxlength='100' autocomplete='off'><div class='err' id='eName'></div></div>"
+      + "<div class='field'><label for='fEmail'>Email</label><input type='email' id='fEmail' autocomplete='off'><div class='err' id='eEmail'></div></div>"
+      + "<div class='field'><label for='fParty'>Party size <span class='hint'>(1-" + table.capacity + ")</span></label><input type='number' id='fParty' min='1' max='" + table.capacity + "' value='2'><div class='err' id='eParty'></div></div>"
+      + "<div class='actions'><button class='btn-primary' id='doBook'>Confirm reservation</button></div>";
+    showPanel();
+    setTimeout(() => { const nameField = $("#fName"); if (nameField) nameField.focus(); }, 60);
+
+    $("#doBook").addEventListener("click", async () => {
+      const request = {
+        diningTableId: tableId, bookingDate: currentDate, slotTime: slotTime,
+        partySize: Number($("#fParty").value), customerName: $("#fName").value, customerEmail: $("#fEmail").value
+      };
+      ["#eName", "#eEmail", "#eParty"].forEach((selector) => { $(selector).textContent = ""; });
+      try {
+        await api.createBooking(request);
+        hidePanel();
+        await render();
+        toast(request.customerName.trim() + " booked for " + slotTime + ".");
+      } catch (error) {
+        if (error.status === 409) {
+          hidePanel();
+          await render();
+          toast(error.message, true);
+          return;
+        }
+        const message = error.message || "Could not book.";
+        if (message.toLowerCase().includes("party")) $("#eParty").textContent = message;
+        else if (message.toLowerCase().includes("email")) $("#eEmail").textContent = message;
+        else if (message.toLowerCase().includes("name")) $("#eName").textContent = message;
+        else toast(message, true);
       }
     });
   }
 
-  async function openDetail(bookingId) {
-    const b = STORE.find(x => x.id === bookingId) || (await api.listBookings(currentDate)).find(x => x.id === bookingId);
-    if (!b) { toast("That reservation is no longer here.", true); await render(); return; }
-    const table = TABLES.find(t => t.id === b.diningTableId) || { name: tableName(b.diningTableId) };
+  async function openBookingDetail(bookingId) {
+    const bookings = await api.listAllBookings();
+    const booking = bookings.find((candidate) => candidate.id === bookingId);
+    if (!booking) {
+      toast("That reservation is no longer here.", true);
+      await render();
+      return;
+    }
+    const summary = await api.getGuest(booking.customerEmail);
+    const nextStatuses = Seated.STATUS_TRANSITIONS[booking.status];
+
+    // Buttons depend on where the booking is in its life cycle
+    const actionButtons = [];
+    if (nextStatuses.includes("Seated")) actionButtons.push("<button class='btn-primary' data-status='Seated'>Seat guests</button>");
+    if (nextStatuses.includes("Completed")) actionButtons.push("<button class='btn-primary' data-status='Completed'>Complete visit</button>");
+    if (nextStatuses.includes("NoShow")) actionButtons.push("<button data-status='NoShow'>No-show</button>");
+    if (nextStatuses.includes("Cancelled")) actionButtons.push("<button class='btn-danger' data-status='Cancelled'>Cancel</button>");
+
     $("#panelBody").innerHTML =
-      "<div class='eyebrow'>Reservation</div>" +
-      "<h3>" + escapeHtml(b.customerName) + "</h3>" +
-      "<p class='slotline'><span class='confirmed-chip'>Confirmed</span></p>" +
-      "<div class='detail-line'><span>Table</span><span>" + escapeHtml(table.name) + "</span></div>" +
-      "<div class='detail-line'><span>Date</span><span>" + prettyDate(b.bookingDate).full + "</span></div>" +
-      "<div class='detail-line'><span>Time</span><span>" + b.slotTime + "</span></div>" +
-      "<div class='detail-line'><span>Party</span><span>" + b.partySize + " guests</span></div>" +
-      "<div class='detail-line'><span>Email</span><span>" + escapeHtml(b.customerEmail) + "</span></div>" +
-      "<div class='actions'><button class='btn-danger' id='doCancel'>Cancel reservation</button></div>";
+      "<div class='eyebrow'>Reservation</div>"
+      + "<h3>" + escapeHtml(booking.customerName) + "</h3>"
+      + "<p class='slotline'>" + statusChip(booking.status) + "</p>"
+      + "<div class='detail-line'><span>Table</span><span>" + escapeHtml(tableName(booking.diningTableId)) + "</span></div>"
+      + "<div class='detail-line'><span>Date</span><span>" + prettyDate(booking.bookingDate).full + "</span></div>"
+      + "<div class='detail-line'><span>Time</span><span>" + booking.slotTime + "</span></div>"
+      + "<div class='detail-line'><span>Party</span><span>" + booking.partySize + " guests</span></div>"
+      + "<div class='detail-line'><span>Email</span><span>" + escapeHtml(booking.customerEmail) + "</span></div>"
+      + "<div class='detail-line'><span>Booked via</span><span>" + escapeHtml(booking.source || "Staff") + "</span></div>"
+      + (actionButtons.length ? "<div class='actions'>" + actionButtons.join("") + "</div>" : "")
+      + "<h4>Guest</h4>"
+      + (summary && summary.guest.tags.length ? "<div class='tag-row' style='margin: 0 0 0.6rem'>" + tagChips(summary.guest.tags) + "</div>" : "")
+      + "<button id='openProfile'>View profile and history" + (summary ? " (" + summary.visits + (summary.visits === 1 ? " visit" : " visits") + ")" : "") + "</button>"
+      + "<h4>Notes</h4><div id='notesHost'></div>";
     showPanel();
-    $("#doCancel").addEventListener("click", async () => { await api.cancelBooking(b.id); hidePanel(); await render(); toast("Reservation cancelled — the slot is free again."); });
+
+    renderNotes(booking.customerEmail, $("#notesHost"));
+    $("#openProfile").addEventListener("click", () => openGuestProfile(booking.customerEmail));
+    $("#panelBody").querySelectorAll("[data-status]").forEach((button) => button.addEventListener("click", async () => {
+      const nextStatus = button.dataset.status;
+      try {
+        await api.setBookingStatus(booking.id, nextStatus);
+        hidePanel();
+        await render();
+        const messages = {
+          Seated: booking.customerName + " is seated.",
+          Completed: "Visit complete. Added to " + booking.customerName + "'s history.",
+          NoShow: "Marked as a no-show. The table is free again.",
+          Cancelled: "Reservation cancelled. The slot is free again."
+        };
+        toast(messages[nextStatus]);
+        if (nextStatus === "NoShow" || nextStatus === "Cancelled") {
+          announceWaitlistMatch();
+        }
+      } catch (error) {
+        toast(error.message, true);
+      }
+    }));
   }
 
-  function toast(msg, warn) {
-    const el = document.createElement("div");
-    el.className = "toast" + (warn ? " warn" : "");
-    el.textContent = msg;
-    $("#toasts").appendChild(el);
-    requestAnimationFrame(() => el.classList.add("show"));
-    setTimeout(() => { el.classList.remove("show"); setTimeout(() => el.remove(), 250); }, 2800);
+  async function openGuestProfile(email) {
+    const summary = await api.getGuest(email);
+    if (!summary) {
+      toast("Guest not found.", true);
+      return;
+    }
+    const guest = summary.guest;
+    const tagButtons = GUEST_TAGS.map((tag) =>
+      "<button data-tag='" + tag + "' class='" + (guest.tags.includes(tag) ? "on" : "") + "'>" + escapeHtml(tag) + "</button>").join("");
+    const historyRows = summary.history.slice(0, 12).map((booking) =>
+      "<div class='history-row'><span>" + prettyDate(booking.bookingDate).short + " · " + booking.slotTime + " · " + escapeHtml(tableName(booking.diningTableId)) + " · " + booking.partySize + "</span>" + statusChip(booking.status) + "</div>").join("");
+
+    $("#panelBody").innerHTML =
+      "<div class='eyebrow'>Guest profile</div>"
+      + "<h3>" + escapeHtml(guest.name) + "</h3>"
+      + "<p class='slotline'>" + escapeHtml(guest.email) + "</p>"
+      + "<div class='mini-stats'>"
+      + "<div><b>" + summary.visits + "</b><span>Visits</span></div>"
+      + "<div><b>" + summary.noShows + "</b><span>No-shows</span></div>"
+      + "<div><b>" + summary.cancellations + "</b><span>Cancelled</span></div>"
+      + "<div><b>" + summary.totalCovers + "</b><span>Covers</span></div></div>"
+      + "<h4>Tags</h4><div class='tag-toggles' id='tagToggles'>" + tagButtons + "</div>"
+      + "<h4>Notes</h4><div id='notesHost'></div>"
+      + "<h4>Visit history</h4>" + (historyRows || "<p class='note-empty'>No visits yet.</p>");
+    showPanel();
+
+    renderNotes(guest.email, $("#notesHost"));
+    $("#tagToggles").querySelectorAll("[data-tag]").forEach((button) => button.addEventListener("click", async () => {
+      await api.toggleGuestTag(guest.email, button.dataset.tag);
+      await openGuestProfile(guest.email);
+      render();
+    }));
   }
 
-  function setView(v) {
-    currentView = v;
-    $("#floorView").hidden = v !== "floor";
-    $("#timelineView").hidden = v !== "timeline";
-    $("#viewFloor").classList.toggle("active", v === "floor");
-    $("#viewTimeline").classList.toggle("active", v === "timeline");
-    $("#viewFloor").setAttribute("aria-selected", v === "floor");
-    $("#viewTimeline").setAttribute("aria-selected", v === "timeline");
+  function openWaitlistForm() {
+    const slotOptions = "<option value=''>Any time</option>" + SLOTS.map((slotTime) => "<option value='" + slotTime + "'>" + slotTime + "</option>").join("");
+    $("#panelBody").innerHTML =
+      "<div class='eyebrow'>Waitlist</div>"
+      + "<h3>Add a guest</h3>"
+      + "<p class='slotline'>" + prettyDate(currentDate).name + " " + prettyDate(currentDate).full + "</p>"
+      + "<div class='field'><label for='wName'>Guest name</label><input type='text' id='wName' maxlength='100' autocomplete='off'></div>"
+      + "<div class='field'><label for='wEmail'>Email</label><input type='email' id='wEmail' autocomplete='off'></div>"
+      + "<div class='field'><label for='wParty'>Party size <span class='hint'>(1-" + MAX_PARTY_SIZE + ")</span></label><input type='number' id='wParty' min='1' max='" + MAX_PARTY_SIZE + "' value='2'></div>"
+      + "<div class='field'><label for='wSlot'>Preferred sitting</label><select id='wSlot'>" + slotOptions + "</select><div class='err' id='wError'></div></div>"
+      + "<div class='actions'><button class='btn-primary' id='doWaitlist'>Add to waitlist</button></div>";
+    showPanel();
+    setTimeout(() => $("#wName").focus(), 60);
+
+    $("#doWaitlist").addEventListener("click", async () => {
+      try {
+        await api.addToWaitlist({
+          date: currentDate, preferredSlot: $("#wSlot").value || null, partySize: Number($("#wParty").value),
+          name: $("#wName").value, email: $("#wEmail").value
+        });
+        hidePanel();
+        await render();
+        toast($("#wName").value.trim() + " added to the waitlist.");
+      } catch (error) {
+        $("#wError").textContent = error.message;
+      }
+    });
   }
+
+  // Guests tab
+  async function renderGuests() {
+    const filterHost = $("#guestFilters");
+    filterHost.innerHTML = ["", ...GUEST_TAGS].map((tag) =>
+      "<button data-filter='" + tag + "' class='" + (guestTagFilter === tag ? "active" : "") + "'>" + (tag || "All") + "</button>").join("");
+    filterHost.querySelectorAll("[data-filter]").forEach((button) => button.addEventListener("click", () => {
+      guestTagFilter = button.dataset.filter;
+      renderGuests();
+    }));
+
+    const searchText = guestSearchText.trim().toLowerCase();
+    const guests = (await api.listGuests()).filter((summary) =>
+      (!guestTagFilter || summary.guest.tags.includes(guestTagFilter))
+      && (!searchText || summary.guest.name.toLowerCase().includes(searchText) || summary.guest.email.includes(searchText)));
+
+    $("#guestGrid").innerHTML = guests.length
+      ? guests.map((summary) =>
+          "<button class='guest-card' data-guest='" + escapeHtml(summary.guest.email) + "'>"
+          + "<div class='gname'>" + escapeHtml(summary.guest.name) + "</div><div class='gmail'>" + escapeHtml(summary.guest.email) + "</div>"
+          + (summary.guest.tags.length ? "<div class='tag-row'>" + tagChips(summary.guest.tags) + "</div>" : "")
+          + "<div class='gstats'><span><b>" + summary.visits + "</b> visits</span><span><b>" + summary.noShows + "</b> no-shows</span><span><b>" + summary.guest.notes.length + "</b> notes</span></div></button>").join("")
+      : "<div class='empty' style='grid-column: 1 / -1'>No guests match.</div>";
+    $("#guestGrid").querySelectorAll("[data-guest]").forEach((card) => card.addEventListener("click", () => openGuestProfile(card.dataset.guest)));
+  }
+
+  // Insights tab
+  function barChartHtml(days) {
+    const highestCovers = Math.max(1, ...days.map((day) => day.covers));
+    return "<div class='bars'>" + days.map((day) =>
+      "<div class='bar-col'><span>" + day.covers + "</span><div class='bar' style='height:" + Math.round(day.covers / highestCovers * 100) + "%'></div><span>" + day.label + "</span></div>").join("") + "</div>";
+  }
+
+  function horizontalBarsHtml(rows, suffix) {
+    const highestValue = Math.max(1, ...rows.map((row) => row.value));
+    return rows.map((row) =>
+      "<div class='hbar-row'><span>" + escapeHtml(row.label) + "</span><div class='hbar-track'><div class='hbar-fill' style='width:" + Math.round(row.value / highestValue * 100) + "%'></div></div><b>" + row.value + suffix + "</b></div>").join("");
+  }
+
+  async function renderInsights() {
+    const insights = await api.getInsights();
+    const coversChange = insights.previousSevenDaysCovers > 0
+      ? Math.round((insights.lastSevenDaysCovers - insights.previousSevenDaysCovers) / insights.previousSevenDaysCovers * 100)
+      : null;
+    const percentOrDash = (value) => value === null ? "-" : value + "%";
+
+    $("#insightTiles").innerHTML =
+      "<div class='tile'><div class='big'>" + insights.lastSevenDaysCovers + "</div><div class='lbl'>Covers, last 7 days</div>"
+      + "<div class='delta'>" + (coversChange === null ? "No earlier week to compare" : (coversChange >= 0 ? "+" : "") + coversChange + "% on the week before") + "</div></div>"
+      + "<div class='tile'><div class='big'>" + percentOrDash(insights.noShowRate) + "</div><div class='lbl'>No-show rate, 30 days</div></div>"
+      + "<div class='tile'><div class='big'>" + percentOrDash(insights.regularGuestRate) + "</div><div class='lbl'>Regulars (5+ visits)</div>"
+      + "<div class='delta'>Busiest sitting: " + (insights.busiestSlot || "-") + "</div></div>";
+
+    $("#insightCharts").innerHTML =
+      "<div class='panel-card'><h3>Covers per night</h3>" + barChartHtml(insights.lastSevenDays) + "</div>"
+      + "<div class='panel-card'><h3>Bookings by sitting, 30 days</h3>" + horizontalBarsHtml(insights.slotCounts, "") + "</div>"
+      + "<div class='panel-card'><h3>Table utilisation, 30 days</h3>" + horizontalBarsHtml(insights.tableUtilisation, "%") + "</div>";
+  }
+
+  // Wiring
+  function setView(view) {
+    currentView = view;
+    $("#floorView").hidden = view !== "floor";
+    $("#timelineView").hidden = view !== "timeline";
+    $("#viewFloor").classList.toggle("active", view === "floor");
+    $("#viewTimeline").classList.toggle("active", view === "timeline");
+    $("#viewFloor").setAttribute("aria-selected", view === "floor");
+    $("#viewTimeline").setAttribute("aria-selected", view === "timeline");
+  }
+
+  function shiftDay(dayCount) {
+    currentDate = addDays(currentDate, dayCount);
+    render();
+  }
+
+  document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => { currentTab = tab.dataset.tab; render(); }));
   $("#viewFloor").addEventListener("click", () => setView("floor"));
   $("#viewTimeline").addEventListener("click", () => setView("timeline"));
-
-  function shiftDay(delta) { const d = parseISODate(currentDate); d.setDate(d.getDate() + delta); currentDate = toISODate(d); render(); }
   $("#prevDay").addEventListener("click", () => shiftDay(-1));
   $("#nextDay").addEventListener("click", () => shiftDay(1));
   $("#todayBtn").addEventListener("click", () => { currentDate = todayISO(); render(); });
-  $("#datePick").addEventListener("change", e => { if (e.target.value) { currentDate = e.target.value; render(); } });
+  $("#datePick").addEventListener("change", (event) => { if (event.target.value) { currentDate = event.target.value; render(); } });
+  $("#addWaitlist").addEventListener("click", openWaitlistForm);
+  $("#guestSearch").addEventListener("input", (event) => { guestSearchText = event.target.value; renderGuests(); });
   $("#closePanel").addEventListener("click", hidePanel);
   $("#scrim").addEventListener("click", hidePanel);
-  document.addEventListener("keydown", e => { if (e.key === "Escape") hidePanel(); });
+  document.addEventListener("keydown", (event) => { if (event.key === "Escape") hidePanel(); });
+  $("#resetDemo").addEventListener("click", () => { Seated.resetDemo(); hidePanel(); render(); toast("Demo data reset."); });
+
+  // When the guest booking page (another tab) changes the data, redraw this page
+  window.addEventListener("storage", (event) => {
+    if (event.key === Seated.STORAGE_KEY) {
+      Seated.reload();
+      render();
+    }
+  });
 
   render();
 </script>
