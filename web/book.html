@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reserve a table</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="seated.css">
+</head>
+<body>
+<div class="wrap narrow">
+  <header class="top">
+    <div class="brand-row">
+      <h1 class="wordmark"><span class="dot"></span>Reserve a table</h1>
+      <span class="demo-tag">Demo &middot; dummy data</span>
+    </div>
+    <p class="subtitle">Dinner service, one-hour sittings from 5 to 9pm. This is the guest-facing side of <a href="index.html">Seated</a>: bookings made here appear on the staff screen straight away.</p>
+  </header>
+
+  <!-- Step 1: when and how many -->
+  <section class="card" id="stepFind">
+    <h2>Find a table</h2>
+    <div class="row2">
+      <div class="field">
+        <label for="dateInput">Date</label>
+        <input type="date" id="dateInput">
+      </div>
+      <div class="field">
+        <label id="partyLabel">Guests</label>
+        <div class="stepper" role="group" aria-labelledby="partyLabel">
+          <button type="button" id="partyDown" aria-label="One fewer guest">&minus;</button>
+          <output id="partyOutput" aria-live="polite">2</output>
+          <button type="button" id="partyUp" aria-label="One more guest">+</button>
+        </div>
+      </div>
+    </div>
+    <label class="muted-text" style="display:block; margin-bottom: 0.5rem;">Available times</label>
+    <div class="slot-grid" id="slotGrid"></div>
+  </section>
+
+  <!-- Waitlist: shown when every sitting that day is full -->
+  <section class="card" id="stepWaitlist" hidden>
+    <h2>Fully booked</h2>
+    <p class="muted-text">Every sitting is taken for that party size. Leave your details and we will email you if a table opens up.</p>
+    <div class="field"><label for="waitName">Name</label><input type="text" id="waitName" maxlength="100" autocomplete="name"></div>
+    <div class="field"><label for="waitEmail">Email</label><input type="email" id="waitEmail" autocomplete="email"></div>
+    <div class="err" id="waitError" style="color: var(--accent-ink); font-size: 0.82rem; margin-bottom: 0.5rem;"></div>
+    <button class="btn-primary full-width" id="joinWaitlist">Join the waitlist</button>
+  </section>
+
+  <!-- Step 2: who is coming -->
+  <section class="card" id="stepDetails" hidden>
+    <h2 id="detailsHeading">Your details</h2>
+    <div class="field"><label for="guestName">Name</label><input type="text" id="guestName" maxlength="100" autocomplete="name"></div>
+    <div class="field"><label for="guestEmail">Email</label><input type="email" id="guestEmail" autocomplete="email"></div>
+    <div class="field">
+      <label for="guestRequest">Special requests <span class="hint">(optional)</span></label>
+      <textarea id="guestRequest" maxlength="300" placeholder="Celebrating something, a high chair, a quiet corner..."></textarea>
+    </div>
+    <label class="checkline"><input type="checkbox" id="guestAllergy"> Someone in my party has an allergy</label>
+    <div class="err" id="detailsError" style="color: var(--accent-ink); font-size: 0.82rem; margin-bottom: 0.5rem;"></div>
+    <button class="btn-primary full-width" id="confirmBooking">Confirm reservation</button>
+  </section>
+
+  <!-- Step 3: confirmation -->
+  <section class="card confirm-card" id="stepConfirmed" hidden>
+    <span class="confirmed-chip">Reservation confirmed</span>
+    <div class="ref" id="confirmRef">SEA-000000</div>
+    <div id="confirmDetails"></div>
+    <p class="muted-text">Quote this reference and your email below to view or cancel the booking.</p>
+    <button class="full-width" id="newBooking">Make another booking</button>
+  </section>
+
+  <!-- Look up or cancel an existing booking -->
+  <section class="card" id="stepManage">
+    <h2>Already booked?</h2>
+    <div class="row2">
+      <div class="field"><label for="lookupRef">Reference</label><input type="text" id="lookupRef" placeholder="SEA-3F9A21" autocomplete="off"></div>
+      <div class="field"><label for="lookupEmail">Email</label><input type="email" id="lookupEmail" autocomplete="email"></div>
+    </div>
+    <button class="full-width" id="lookupBooking">Find my booking</button>
+    <div id="lookupResult"></div>
+  </section>
+
+  <footer class="foot">
+    <p>Demo only. Nothing is sent anywhere and no email is really delivered. Tables are assigned automatically: the smallest table that fits your party, so larger tables stay free for larger groups.</p>
+  </footer>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="seated-core.js"></script>
+<script>
+  "use strict";
+
+  const { MAX_PARTY_SIZE, api, escapeHtml, prettyDate, todayISO, addDays, referenceFor } = Seated;
+
+  // The choices the guest has made so far
+  let selectedDate = addDays(todayISO(), 1);
+  let partySize = 2;
+  let selectedSlot = null;
+
+  const $ = (selector) => document.querySelector(selector);
+
+  function toast(message, isWarning) {
+    const element = document.createElement("div");
+    element.className = "toast" + (isWarning ? " warn" : "");
+    element.textContent = message;
+    $("#toasts").appendChild(element);
+    requestAnimationFrame(() => element.classList.add("show"));
+    setTimeout(() => { element.classList.remove("show"); setTimeout(() => element.remove(), 250); }, 3200);
+  }
+
+  // Show or hide the steps that depend on what the guest has picked
+  function showSteps({ waitlist, details, confirmed }) {
+    $("#stepFind").hidden = confirmed;
+    $("#stepWaitlist").hidden = !waitlist;
+    $("#stepDetails").hidden = !details;
+    $("#stepConfirmed").hidden = !confirmed;
+  }
+
+  // Redraw the time buttons for the chosen date and party size
+  async function renderSlots() {
+    $("#partyOutput").textContent = partySize;
+    $("#dateInput").value = selectedDate;
+
+    const availability = await api.getSlotAvailability(selectedDate, partySize);
+    const anyAvailable = availability.some((slot) => slot.available);
+
+    // A previously chosen time may have become unavailable (different date or party)
+    if (selectedSlot && !availability.find((slot) => slot.slotTime === selectedSlot && slot.available)) {
+      selectedSlot = null;
+    }
+
+    $("#slotGrid").innerHTML = availability.map((slot) =>
+      "<button type='button' class='slot-option" + (slot.slotTime === selectedSlot ? " selected" : "") + "' data-slot='" + slot.slotTime + "'" + (slot.available ? "" : " disabled") + ">" + slot.slotTime + "</button>").join("");
+    $("#slotGrid").querySelectorAll("[data-slot]:not(:disabled)").forEach((button) => button.addEventListener("click", () => {
+      selectedSlot = button.dataset.slot;
+      renderSlots();
+    }));
+
+    const day = prettyDate(selectedDate);
+    $("#detailsHeading").textContent = selectedSlot
+      ? "Your details · " + day.shortName + " " + day.short + " at " + selectedSlot + " for " + partySize
+      : "Your details";
+    showSteps({ waitlist: !anyAvailable, details: Boolean(selectedSlot), confirmed: false });
+  }
+
+  function changeParty(delta) {
+    partySize = Math.min(MAX_PARTY_SIZE, Math.max(1, partySize + delta));
+    renderSlots();
+  }
+
+  async function confirmBooking() {
+    $("#detailsError").textContent = "";
+    try {
+      const booking = await api.createBooking({
+        diningTableId: null,
+        bookingDate: selectedDate,
+        slotTime: selectedSlot,
+        partySize: partySize,
+        customerName: $("#guestName").value,
+        customerEmail: $("#guestEmail").value,
+        guestRequest: $("#guestRequest").value,
+        hasAllergy: $("#guestAllergy").checked,
+        source: "Guest page"
+      });
+      showConfirmation(booking);
+    } catch (error) {
+      $("#detailsError").textContent = error.message;
+      // Someone else took the slot while this guest was typing: refresh the times
+      if (error.status === 409) {
+        renderSlots();
+      }
+    }
+  }
+
+  function bookingDetailsHtml(booking) {
+    const day = prettyDate(booking.bookingDate);
+    return "<div class='detail-line'><span>Name</span><span>" + escapeHtml(booking.customerName) + "</span></div>"
+      + "<div class='detail-line'><span>Date</span><span>" + day.name + " " + day.full + "</span></div>"
+      + "<div class='detail-line'><span>Time</span><span>" + booking.slotTime + "</span></div>"
+      + "<div class='detail-line'><span>Guests</span><span>" + booking.partySize + "</span></div>";
+  }
+
+  function showConfirmation(booking) {
+    $("#confirmRef").textContent = referenceFor(booking);
+    $("#confirmDetails").innerHTML = bookingDetailsHtml(booking);
+    $("#lookupRef").value = referenceFor(booking);
+    $("#lookupEmail").value = booking.customerEmail;
+    showSteps({ waitlist: false, details: false, confirmed: true });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function joinWaitlist() {
+    $("#waitError").textContent = "";
+    try {
+      await api.addToWaitlist({ date: selectedDate, preferredSlot: null, partySize: partySize, name: $("#waitName").value, email: $("#waitEmail").value });
+      toast("You are on the waitlist. We will email you if a table opens.");
+      $("#waitName").value = "";
+      $("#waitEmail").value = "";
+    } catch (error) {
+      $("#waitError").textContent = error.message;
+    }
+  }
+
+  async function lookupBooking() {
+    const booking = await api.findBookingByReference($("#lookupRef").value, $("#lookupEmail").value);
+    const host = $("#lookupResult");
+    if (!booking) {
+      host.innerHTML = "<p class='muted-text' style='margin-top: 0.9rem'>We could not find a booking with that reference and email.</p>";
+      return;
+    }
+    const canCancel = booking.status === "Confirmed";
+    host.innerHTML = "<div style='margin-top: 1rem'>" + bookingDetailsHtml(booking)
+      + "<div class='detail-line'><span>Status</span><span>" + (booking.status === "NoShow" ? "No-show" : booking.status) + "</span></div></div>"
+      + (canCancel ? "<button class='btn-danger full-width' id='cancelMine'>Cancel this booking</button>" : "");
+    if (canCancel) {
+      $("#cancelMine").addEventListener("click", async () => {
+        await api.cancelBooking(booking.id);
+        toast("Your booking is cancelled.");
+        lookupBooking();
+        renderSlots();
+      });
+    }
+  }
+
+  // Wiring
+  $("#dateInput").min = todayISO();
+  $("#dateInput").addEventListener("change", (event) => {
+    if (event.target.value && !(event.target.value < todayISO())) {
+      selectedDate = event.target.value;
+      renderSlots();
+    }
+  });
+  $("#partyDown").addEventListener("click", () => changeParty(-1));
+  $("#partyUp").addEventListener("click", () => changeParty(1));
+  $("#confirmBooking").addEventListener("click", confirmBooking);
+  $("#joinWaitlist").addEventListener("click", joinWaitlist);
+  $("#lookupBooking").addEventListener("click", lookupBooking);
+  $("#newBooking").addEventListener("click", () => { selectedSlot = null; $("#lookupResult").innerHTML = ""; renderSlots(); });
+
+  // When the staff screen changes bookings, refresh the available times here
+  window.addEventListener("storage", (event) => {
+    if (event.key === Seated.STORAGE_KEY) {
+      Seated.reload();
+      if (!$("#stepConfirmed").hidden) return;
+      renderSlots();
+    }
+  });
+
+  renderSlots();
+</script>
+</body>
+</html>
