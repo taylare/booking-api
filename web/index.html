@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Seated — The Copper Table</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+  /* Base reset (normally provided by the host; included here for a standalone page) */
+  html, body { margin: 0; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+
+  /* Layout concept: a host-stand table-management screen. A date + sitting selector drives a top-down floor plan of the room; tables light up by status and open a slide-in panel to book or cancel. A timeline view gives the whole evening at a glance. */
+  :root {
+    --bg: #f4f1ec;
+    --surface: #ffffff;
+    --surface-2: #ece5db;
+    --fg: #241c1a;
+    --muted: #726158;
+    --border: #e0d6cb;
+    --accent: #7a2230;          /* wine */
+    --accent-ink: #601823;
+    --accent-soft: #f3dee0;
+    --free: #2f6b4f;
+    --free-soft: #e0efe6;
+    --blocked: #b7a99d;
+    --floor: #efe7db;
+    --floor-line: #e3d8c8;
+    --wall: #d8ccbb;
+    --chair: #c9b9a6;
+    --shadow: 0 10px 34px rgba(60, 30, 20, 0.14);
+    --font-display: "Fraunces", Georgia, serif;
+    --font-ui: "Figtree", "Segoe UI", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #181311; --surface: #221b18; --surface-2: #2b221e; --fg: #f0e9e2; --muted: #b2a398;
+      --border: #392d28; --accent: #d98a97; --accent-ink: #e9aab4; --accent-soft: #3d2328;
+      --free: #7cc8a0; --free-soft: #16382a; --blocked: #6a5a50;
+      --floor: #211a16; --floor-line: #2a211c; --wall: #3a2e27; --chair: #4a3d35;
+      --shadow: 0 10px 34px rgba(0, 0, 0, 0.5); color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #181311; --surface: #221b18; --surface-2: #2b221e; --fg: #f0e9e2; --muted: #b2a398;
+    --border: #392d28; --accent: #d98a97; --accent-ink: #e9aab4; --accent-soft: #3d2328;
+    --free: #7cc8a0; --free-soft: #16382a; --blocked: #6a5a50;
+    --floor: #211a16; --floor-line: #2a211c; --wall: #3a2e27; --chair: #4a3d35;
+    --shadow: 0 10px 34px rgba(0, 0, 0, 0.5); color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--fg); font-family: var(--font-ui); line-height: 1.5; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+  .wrap {
+    max-width: 1080px; margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0;
+  }
+
+  /* ---- Header ---- */
+  header.top { padding-block: clamp(1.6rem, 4vw, 2.4rem) 1rem; }
+  .brand-row { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
+  .wordmark {
+    font-family: var(--font-display); font-weight: 600; font-size: clamp(1.9rem, 5vw, 2.7rem);
+    letter-spacing: -0.02em; margin: 0; line-height: 1; display: inline-flex; align-items: center; gap: 0.5rem;
+  }
+  .wordmark .dot { width: 0.5em; height: 0.5em; border-radius: 50%; background: var(--accent); display: inline-block; }
+  .demo-tag { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 0.28em 0.65em; border-radius: 999px; }
+  .subtitle { color: var(--muted); margin: 0.55rem 0 0; font-size: 0.98rem; }
+  .subtitle a { color: var(--accent-ink); }
+
+  /* ---- Date bar ---- */
+  .datebar { display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; margin-top: 1.3rem; padding: 0.7rem 0.9rem; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; }
+  .datebar .daylabel { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; margin-right: auto; }
+  .datebar .daylabel small { display: block; font-family: var(--font-ui); font-size: 0.76rem; font-weight: 500; color: var(--muted); }
+  button { font-family: var(--font-ui); font-size: 0.9rem; cursor: pointer; border: 1px solid var(--border); background: var(--surface-2); color: var(--fg); padding: 0.5rem 0.85rem; border-radius: 10px; font-weight: 600; transition: background 0.15s, border-color 0.15s, color 0.15s; }
+  button:hover { border-color: var(--accent); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  :root[data-theme="dark"] .btn-primary, :root:not([data-theme="light"]) .btn-primary { color: #241012; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn-primary { color: #241012; } }
+  .btn-primary:hover { background: var(--accent-ink); }
+  input[type="date"], input[type="text"], input[type="email"], input[type="number"] { font-family: var(--font-ui); font-size: 0.95rem; color: var(--fg); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.5rem 0.7rem; width: 100%; }
+  input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+  .datebar input[type="date"] { width: auto; }
+
+  /* ---- Tiles ---- */
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; margin-top: 1rem; }
+  @media (max-width: 520px) { .tiles { grid-template-columns: 1fr; } }
+  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 0.85rem 1.05rem; }
+  .tile .big { font-family: var(--font-display); font-size: 1.85rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .tile .lbl { color: var(--muted); font-size: 0.8rem; margin-top: 0.3rem; }
+
+  /* ---- Controls row: sitting selector + view toggle ---- */
+  .controls { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin: 1.6rem 0 0.7rem; }
+  .sittings { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+  .sittings .lead { font-size: 0.82rem; color: var(--muted); margin-right: 0.2rem; }
+  .slotbtn { font-variant-numeric: tabular-nums; padding: 0.42rem 0.7rem; }
+  .slotbtn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  :root[data-theme="dark"] .slotbtn.active, :root:not([data-theme="light"]) .slotbtn.active { color: #241012; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .slotbtn.active { color: #241012; } }
+  .viewtoggle { display: inline-flex; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 3px; }
+  .viewtoggle button { border: none; background: transparent; padding: 0.4rem 0.8rem; border-radius: 8px; }
+  .viewtoggle button.active { background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+
+  .legend { display: flex; gap: 0.9rem; flex-wrap: wrap; font-size: 0.8rem; color: var(--muted); margin: 0 0 0.7rem; }
+  .legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+  .swatch { width: 0.9rem; height: 0.9rem; border-radius: 4px; border: 2px solid; display: inline-block; }
+  .sw-free { background: var(--free-soft); border-color: var(--free); }
+  .sw-booked { background: var(--accent); border-color: var(--accent-ink); }
+  .sw-blocked { background: var(--surface-2); border-color: var(--border); }
+
+  /* ---- Floor plan ---- */
+  .room {
+    position: relative; width: 100%; aspect-ratio: 16 / 10; border: 1px solid var(--border);
+    border-radius: 18px; overflow: hidden;
+    background:
+      repeating-linear-gradient(90deg, transparent 0, transparent 46px, var(--floor-line) 46px, var(--floor-line) 47px),
+      repeating-linear-gradient(0deg, transparent 0, transparent 46px, var(--floor-line) 46px, var(--floor-line) 47px),
+      var(--floor);
+  }
+  .zone { position: absolute; font-size: clamp(0.56rem, 1.5vw, 0.76rem); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .wall-window { position: absolute; left: 4%; right: 4%; top: 3.5%; height: 8px; border-radius: 4px;
+    background: repeating-linear-gradient(90deg, var(--wall) 0, var(--wall) 22px, transparent 22px, transparent 30px); opacity: 0.9; }
+  .pass { position: absolute; right: 3%; bottom: 5%; width: 16%; height: 12%; background: var(--wall); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: clamp(0.5rem,1.3vw,0.68rem); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; opacity: 0.85; }
+  .door { position: absolute; left: 3.5%; bottom: 4%; width: 13%; height: 7px; border-radius: 4px; background: var(--accent); opacity: 0.55; }
+
+  .table { position: absolute; display: flex; flex-direction: column; padding: 0; background: transparent; border: none; cursor: pointer; }
+  .table .chairs { display: flex; justify-content: center; align-items: center; gap: 7%; height: clamp(7px, 1.7vw, 13px); flex-shrink: 0; }
+  .table .chair { width: 13%; max-width: 16px; height: 100%; background: var(--chair); border-radius: 3px; }
+  .table .body {
+    flex: 1; min-height: 0; margin: 4% 0; border-radius: 10px; border: 2px solid var(--border);
+    background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1px; padding: 2px; text-align: center; transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .table .body .nm { font-family: var(--font-display); font-weight: 600; font-size: clamp(0.6rem, 1.5vw, 0.92rem); line-height: 1.05; }
+  .table .body .st { font-size: clamp(0.52rem, 1.25vw, 0.76rem); line-height: 1.05; opacity: 0.95; }
+  .table.free .body { border-color: var(--free); background: var(--free-soft); color: var(--free); }
+  .table.free:hover .body { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .table.reserved .body { border-color: var(--accent-ink); background: var(--accent); color: #fff; }
+  :root[data-theme="dark"] .table.reserved .body, :root:not([data-theme="light"]) .table.reserved .body { color: #241012; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .table.reserved .body { color: #241012; } }
+  .table.reserved:hover .body { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .table.blocked { cursor: not-allowed; }
+  .table.blocked .body { border-color: var(--border); background: var(--surface-2); color: var(--blocked); }
+  .room.past::after { content: "Past service \2014 view only"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(120,100,90,0.14); font-weight: 600; color: var(--muted); font-size: 0.95rem; }
+
+  /* ---- Timeline (grid) ---- */
+  .grid-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+  table.grid { border-collapse: collapse; width: 100%; min-width: 540px; }
+  table.grid th, table.grid td { padding: 0; text-align: center; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
+  table.grid thead th { font-weight: 600; font-size: 0.85rem; color: var(--muted); padding: 0.7rem 0.4rem; background: var(--surface-2); font-variant-numeric: tabular-nums; }
+  table.grid tbody th { text-align: left; padding: 0.7rem 0.9rem; background: var(--surface-2); position: sticky; left: 0; min-width: 118px; }
+  table.grid tbody th .tname { font-weight: 600; font-size: 0.9rem; }
+  table.grid tbody th .tcap { color: var(--muted); font-size: 0.73rem; }
+  table.grid td:last-child, table.grid th:last-child { border-right: none; }
+  table.grid tbody tr:last-child th, table.grid tbody tr:last-child td { border-bottom: none; }
+  .cell { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; width: 100%; min-height: 54px; padding: 0.4rem 0.3rem; border: none; background: transparent; font-family: var(--font-ui); transition: background 0.12s; }
+  .cell.free { background: var(--free-soft); color: var(--free); cursor: pointer; font-weight: 600; }
+  .cell.free:hover { background: var(--free); color: #fff; }
+  :root[data-theme="dark"] .cell.free:hover, :root:not([data-theme="light"]) .cell.free:hover { color: #0c1f16; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cell.free:hover { color: #0c1f16; } }
+  .cell.booked { background: var(--accent); color: #fff; cursor: pointer; }
+  :root[data-theme="dark"] .cell.booked, :root:not([data-theme="light"]) .cell.booked { color: #241012; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cell.booked { color: #241012; } }
+  .cell.booked .who { font-weight: 700; font-size: 0.82rem; }
+  .cell.booked .party { font-size: 0.72rem; opacity: 0.9; }
+  .cell.blocked { background: var(--surface-2); color: var(--blocked); cursor: not-allowed; font-size: 0.8rem; }
+
+  /* ---- Reservations list ---- */
+  .list { margin-top: 1.6rem; }
+  .list h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.2rem; margin: 0 0 0.6rem; }
+  .booking-row { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 0.7rem 0.9rem; margin-bottom: 0.5rem; }
+  .booking-row .time { font-family: var(--font-display); font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.4rem; }
+  .booking-row .meta { min-width: 0; flex: 1; }
+  .booking-row .meta b { font-weight: 600; }
+  .booking-row .meta span { color: var(--muted); font-size: 0.85rem; display: block; }
+  .booking-row .tbl { font-size: 0.8rem; color: var(--muted); }
+  .empty { color: var(--muted); padding: 1rem; text-align: center; background: var(--surface); border: 1px dashed var(--border); border-radius: 12px; }
+
+  /* ---- Panel ---- */
+  .scrim { position: fixed; inset: 0; background: rgba(20,10,8,0.45); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 40; }
+  .scrim.show { opacity: 1; pointer-events: auto; }
+  .panel { position: fixed; z-index: 50; background: var(--surface); box-shadow: var(--shadow); top: 0; right: 0; height: 100%; width: min(380px, 92vw); padding: 1.3rem; padding-top: calc(1.3rem + env(safe-area-inset-top, 0px)); padding-right: max(1.3rem, env(safe-area-inset-right, 0px)); transform: translateX(100%); transition: transform 0.25s ease; overflow-y: auto; }
+  .panel.show { transform: translateX(0); }
+  .panel h3 { font-family: var(--font-display); font-weight: 600; font-size: 1.4rem; margin: 0.2rem 0 0.1rem; }
+  .panel .slotline { color: var(--muted); margin: 0 0 1.2rem; font-variant-numeric: tabular-nums; }
+  .field { margin-bottom: 0.9rem; }
+  .field label { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 0.3rem; }
+  .field .hint { color: var(--muted); font-weight: 400; font-size: 0.78rem; }
+  .field .err { color: var(--accent-ink); font-size: 0.78rem; margin-top: 0.25rem; }
+  .panel .actions { display: flex; gap: 0.6rem; margin-top: 1.2rem; }
+  .panel .actions button { flex: 1; }
+  .closex { position: absolute; top: calc(0.9rem + env(safe-area-inset-top, 0px)); right: 0.9rem; width: 2rem; height: 2rem; padding: 0; border-radius: 8px; font-size: 1.1rem; line-height: 1; }
+  .detail-line { display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
+  .detail-line span:first-child { color: var(--muted); }
+  .confirmed-chip { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--free); background: var(--free-soft); padding: 0.2em 0.6em; border-radius: 999px; }
+  .btn-danger { background: transparent; color: var(--accent-ink); border-color: var(--accent); }
+  .btn-danger:hover { background: var(--accent-soft); }
+
+  /* ---- Toast ---- */
+  .toasts { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(1.1rem + env(safe-area-inset-bottom, 0px)); z-index: 60; display: flex; flex-direction: column; gap: 0.5rem; width: max-content; max-width: 90vw; }
+  .toast { background: var(--fg); color: var(--bg); padding: 0.65rem 1rem; border-radius: 10px; font-size: 0.9rem; font-weight: 500; box-shadow: var(--shadow); opacity: 0; transform: translateY(8px); transition: opacity 0.2s, transform 0.2s; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.warn { background: var(--accent); color: #fff; }
+  :root[data-theme="dark"] .toast.warn, :root:not([data-theme="light"]) .toast.warn { color: #241012; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .toast.warn { color: #241012; } }
+
+  footer.foot { padding-block: 2rem 3rem; color: var(--muted); font-size: 0.85rem; max-width: 72ch; }
+  footer.foot a { color: var(--accent-ink); }
+  footer.foot code { font-family: ui-monospace, Consolas, monospace; background: var(--surface-2); padding: 0.1em 0.4em; border-radius: 5px; font-size: 0.86em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand-row">
+      <h1 class="wordmark"><span class="dot"></span>Seated</h1>
+      <span class="demo-tag">Demo &middot; dummy data</span>
+    </div>
+    <p class="subtitle">Table management for <strong>The Copper Table</strong> &mdash; a sample front end for the <a id="docsLink" href="https://taylare.github.io/booking-api/" target="_blank" rel="noopener">Booking API</a>. Dinner service, one-hour sittings, 5&ndash;9pm.</p>
+  </header>
+
+  <div class="datebar">
+    <div class="daylabel"><span id="dayName">&mdash;</span><small id="dayFull">&mdash;</small></div>
+    <button id="prevDay" aria-label="Previous day">&larr;</button>
+    <button id="todayBtn">Today</button>
+    <button id="nextDay" aria-label="Next day">&rarr;</button>
+    <input type="date" id="datePick" aria-label="Pick a date">
+  </div>
+
+  <div class="tiles">
+    <div class="tile"><div class="big" id="statCovers">0</div><div class="lbl">Covers booked this evening</div></div>
+    <div class="tile"><div class="big" id="statFree">0</div><div class="lbl">Free slots remaining</div></div>
+    <div class="tile"><div class="big" id="statTables">5</div><div class="lbl">Tables in the room</div></div>
+  </div>
+
+  <div class="controls">
+    <div class="sittings" id="sittings"><span class="lead">Sitting</span></div>
+    <div class="viewtoggle" role="tablist" aria-label="View">
+      <button id="viewFloor" class="active" role="tab" aria-selected="true">Floor plan</button>
+      <button id="viewTimeline" role="tab" aria-selected="false">Timeline</button>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><i class="swatch sw-free"></i> Free</span>
+    <span><i class="swatch sw-booked"></i> Reserved</span>
+    <span><i class="swatch sw-blocked"></i> Unavailable</span>
+  </div>
+
+  <div id="floorView">
+    <div class="room" id="room">
+      <div class="wall-window"></div>
+      <div class="zone" style="left:46%; top:6.5%;">Window</div>
+      <div class="pass">Pass</div>
+      <div class="door"></div>
+      <div class="zone" style="left:3.5%; bottom:7.5%;">Entrance</div>
+      <!-- tables injected here -->
+    </div>
+  </div>
+
+  <div id="timelineView" hidden>
+    <div class="grid-scroll"><table class="grid" id="grid"><thead></thead><tbody></tbody></table></div>
+  </div>
+
+  <div class="list">
+    <h2 id="listHeading">Reservations</h2>
+    <div id="bookingList"></div>
+  </div>
+
+  <footer class="foot">
+    <p>Self-contained demo: reservations live only in your browser and reset when you clear it. It enforces the real API's rules &mdash; one-hour slots, party sizes capped by table, no double-booking a confirmed slot, and cancelling frees the slot. It is written as a real API client: set <code>API_BASE</code> in the code to a running API and every action calls the live endpoints instead of the demo data.</p>
+  </footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
+  <button class="closex" id="closePanel" aria-label="Close">&times;</button>
+  <div id="panelBody"></div>
+</aside>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+  "use strict";
+
+  /* =======================================================================
+     CONFIG. Point this at a running Booking API to go live; leave null for
+     the built-in demo data so the page works anywhere with no server.
+     ======================================================================= */
+  const API_BASE = null;
+
+  const TABLES = [
+    { id: 1, name: "Window 1", capacity: 2 },
+    { id: 2, name: "Window 2", capacity: 2 },
+    { id: 3, name: "Booth 1", capacity: 4 },
+    { id: 4, name: "Booth 2", capacity: 4 },
+    { id: 5, name: "Long table", capacity: 8 }
+  ];
+  const SLOTS = ["17:00", "18:00", "19:00", "20:00", "21:00"];
+  const STORAGE_KEY = "seated-bookings-v1";
+
+  // Where each table sits in the room, as % of the floor plan (left, top, width, height).
+  const LAYOUT = {
+    1: { left: 9,  top: 11, w: 13, h: 23 },
+    2: { left: 30, top: 11, w: 13, h: 23 },
+    3: { left: 70, top: 13, w: 17, h: 25 },
+    4: { left: 70, top: 55, w: 17, h: 25 },
+    5: { left: 23, top: 44, w: 30, h: 22 }
+  };
+
+  /* ---- Dates (local, no time zones) ---- */
+  function toISODate(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function parseISODate(s) { const p = s.split("-").map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+  function todayISO() { return toISODate(new Date()); }
+  function isPast(iso) { return iso < todayISO(); }
+
+  /* =======================================================================
+     DATA LAYER (demo + live client share one interface)
+     ======================================================================= */
+  function loadStore() {
+    try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); } catch (e) {}
+    const seed = seedBookings(); saveStore(seed); return seed;
+  }
+  function saveStore(list) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch (e) {} }
+  function seedBookings() {
+    const t = todayISO();
+    return [
+      { id: uid(), diningTableId: 1, bookingDate: t, slotTime: "17:00", partySize: 2, customerName: "Delgado", customerEmail: "delgado@example.com", status: "Confirmed" },
+      { id: uid(), diningTableId: 2, bookingDate: t, slotTime: "18:00", partySize: 2, customerName: "Chen", customerEmail: "chen@example.com", status: "Confirmed" },
+      { id: uid(), diningTableId: 3, bookingDate: t, slotTime: "19:00", partySize: 4, customerName: "Rivera", customerEmail: "rivera@example.com", status: "Confirmed" },
+      { id: uid(), diningTableId: 5, bookingDate: t, slotTime: "19:00", partySize: 7, customerName: "Okafor", customerEmail: "okafor@example.com", status: "Confirmed" },
+      { id: uid(), diningTableId: 5, bookingDate: t, slotTime: "20:00", partySize: 6, customerName: "Haddad", customerEmail: "haddad@example.com", status: "Confirmed" }
+    ];
+  }
+  function uid() { try { if (crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) {} return "id-" + Math.random().toString(36).slice(2) + Date.now().toString(36); }
+
+  let STORE = loadStore();
+  function ApiError(status, message) { this.status = status; this.message = message; }
+
+  const demoApi = {
+    async getTables() { return TABLES.slice(); },
+    async listBookings(dateISO) { return STORE.filter(b => b.bookingDate === dateISO).sort((a, b) => a.slotTime.localeCompare(b.slotTime)); },
+    async getAvailability(tableId, dateISO) {
+      const taken = STORE.filter(b => b.diningTableId === tableId && b.bookingDate === dateISO && b.status === "Confirmed").map(b => b.slotTime);
+      return SLOTS.filter(s => taken.indexOf(s) === -1);
+    },
+    async createBooking(req) {
+      const table = TABLES.find(t => t.id === req.diningTableId);
+      if (!table) throw new ApiError(400, "That table does not exist.");
+      if (isPast(req.bookingDate)) throw new ApiError(400, "You cannot book a date in the past.");
+      if (SLOTS.indexOf(req.slotTime) === -1) throw new ApiError(400, "Pick a valid one-hour slot.");
+      if (req.partySize < 1 || req.partySize > table.capacity) throw new ApiError(400, "Party of " + req.partySize + " is too large for " + table.name + " (seats " + table.capacity + ").");
+      if (!req.customerName || req.customerName.trim().length === 0) throw new ApiError(400, "A guest name is required.");
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(req.customerEmail || "")) throw new ApiError(400, "Enter a valid email address.");
+      if (STORE.some(b => b.diningTableId === req.diningTableId && b.bookingDate === req.bookingDate && b.slotTime === req.slotTime && b.status === "Confirmed")) throw new ApiError(409, "That slot was just taken.");
+      const booking = Object.assign({ id: uid(), status: "Confirmed" }, req, { customerName: req.customerName.trim() });
+      STORE.push(booking); saveStore(STORE); return booking;
+    },
+    async cancelBooking(id) { const b = STORE.find(x => x.id === id); if (b && b.status !== "Cancelled") { b.status = "Cancelled"; saveStore(STORE); } return true; }
+  };
+
+  const liveApi = {
+    async getTables() { return (await fetch(API_BASE + "/api/v1/tables")).json(); },
+    async listBookings(dateISO) {
+      const data = await (await fetch(API_BASE + "/api/v1/bookings?date=" + dateISO + "&pageSize=100")).json();
+      return (data.items || []).map(b => Object.assign({}, b, { slotTime: String(b.slotTime).slice(0, 5) }));
+    },
+    async getAvailability(tableId, dateISO) {
+      const data = await (await fetch(API_BASE + "/api/v1/tables/" + tableId + "/availability?date=" + dateISO)).json();
+      return (data.availableSlots || []).map(s => String(s).slice(0, 5));
+    },
+    async createBooking(req) {
+      const r = await fetch(API_BASE + "/api/v1/bookings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.assign({}, req, { slotTime: req.slotTime + ":00" })) });
+      if (r.status === 201) return r.json();
+      throw new ApiError(r.status, r.status === 409 ? "That slot was just taken." : "The booking was rejected.");
+    },
+    async cancelBooking(id) { await fetch(API_BASE + "/api/v1/bookings/" + id, { method: "DELETE" }); return true; }
+  };
+
+  const api = API_BASE ? liveApi : demoApi;
+
+  /* =======================================================================
+     UI
+     ======================================================================= */
+  let currentDate = todayISO();
+  let currentSlot = "19:00";       // the sitting shown on the floor plan
+  let currentView = "floor";
+  const $ = sel => document.querySelector(sel);
+  const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function prettyDate(iso) { const d = parseISODate(iso); return { name: dayNames[d.getDay()], full: d.getDate() + " " + monthNames[d.getMonth()] + " " + d.getFullYear() }; }
+  function tableName(id) { const t = TABLES.find(x => x.id === id); return t ? t.name : "Table " + id; }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+  // Build the sitting selector once.
+  (function buildSittings() {
+    const host = $("#sittings");
+    SLOTS.forEach(s => {
+      const b = document.createElement("button");
+      b.className = "slotbtn" + (s === currentSlot ? " active" : "");
+      b.textContent = s; b.dataset.slot = s;
+      b.addEventListener("click", () => { currentSlot = s; render(); });
+      host.appendChild(b);
+    });
+  })();
+
+  async function render() {
+    const p = prettyDate(currentDate);
+    const past = isPast(currentDate);
+    $("#dayName").textContent = (currentDate === todayISO() ? "Today · " : "") + p.name;
+    $("#dayFull").textContent = p.full;
+    $("#datePick").value = currentDate;
+    $("#listHeading").textContent = "Reservations — " + p.name + " " + p.full.replace(/ \d{4}$/, "");
+
+    document.querySelectorAll(".slotbtn").forEach(b => b.classList.toggle("active", b.dataset.slot === currentSlot));
+
+    // One fetch for the evening; derive both views from it.
+    const bookings = await api.listBookings(currentDate);
+    const confirmed = bookings.filter(b => b.status === "Confirmed");
+    const byCell = {};
+    confirmed.forEach(b => { byCell[b.diningTableId + "@" + b.slotTime] = b; });
+
+    // Stats
+    let covers = 0; confirmed.forEach(b => { covers += b.partySize; });
+    $("#statCovers").textContent = covers;
+    $("#statFree").textContent = past ? 0 : (TABLES.length * SLOTS.length - confirmed.length);
+    $("#statTables").textContent = TABLES.length;
+
+    renderFloor(byCell, past);
+    renderTimeline(byCell, past);
+    renderList(confirmed);
+  }
+
+  function renderFloor(byCell, past) {
+    const room = $("#room");
+    room.classList.toggle("past", past);
+    // Remove old tables, keep the fixed scenery elements.
+    room.querySelectorAll(".table").forEach(el => el.remove());
+    TABLES.forEach(t => {
+      const pos = LAYOUT[t.id];
+      const booking = byCell[t.id + "@" + currentSlot];
+      const el = document.createElement("button");
+      el.className = "table " + (past ? "blocked" : booking ? "reserved" : "free");
+      el.style.left = pos.left + "%"; el.style.top = pos.top + "%";
+      el.style.width = pos.w + "%"; el.style.height = pos.h + "%";
+      const topChairs = Math.ceil(t.capacity / 2), botChairs = Math.floor(t.capacity / 2);
+      const chairRow = n => "<div class='chairs'>" + Array.from({ length: n }).map(() => "<div class='chair'></div>").join("") + "</div>";
+      let status;
+      if (past) status = "closed";
+      else if (booking) status = escapeHtml(booking.customerName) + " · " + booking.partySize;
+      else status = "seats " + t.capacity;
+      el.innerHTML = chairRow(topChairs) +
+        "<div class='body'><span class='nm'>" + escapeHtml(t.name) + "</span><span class='st'>" + status + "</span></div>" +
+        chairRow(botChairs);
+      if (!past) {
+        el.addEventListener("click", () => booking ? openDetail(booking.id) : openBookingForm(t.id, currentSlot));
+      }
+      room.appendChild(el);
+    });
+  }
+
+  function renderTimeline(byCell, past) {
+    let thead = "<tr><th>Table</th>"; SLOTS.forEach(s => { thead += "<th>" + s + "</th>"; }); thead += "</tr>";
+    $("#grid thead").innerHTML = thead;
+    let body = "";
+    TABLES.forEach(t => {
+      body += "<tr><th><div class='tname'>" + escapeHtml(t.name) + "</div><div class='tcap'>seats " + t.capacity + "</div></th>";
+      SLOTS.forEach(s => {
+        const booking = byCell[t.id + "@" + s];
+        if (booking) body += "<td><button class='cell booked' data-book='" + booking.id + "'><span class='who'>" + escapeHtml(booking.customerName) + "</span><span class='party'>party of " + booking.partySize + "</span></button></td>";
+        else if (past) body += "<td><div class='cell blocked'>—</div></td>";
+        else body += "<td><button class='cell free' data-table='" + t.id + "' data-slot='" + s + "'>+ book</button></td>";
+      });
+      body += "</tr>";
+    });
+    $("#grid tbody").innerHTML = body;
+    $("#grid").querySelectorAll(".cell.free").forEach(c => c.addEventListener("click", () => openBookingForm(Number(c.dataset.table), c.dataset.slot)));
+    $("#grid").querySelectorAll(".cell.booked").forEach(c => c.addEventListener("click", () => openDetail(c.dataset.book)));
+  }
+
+  function renderList(confirmed) {
+    const host = $("#bookingList");
+    if (!confirmed.length) { host.innerHTML = "<div class='empty'>No reservations for this evening yet.</div>"; return; }
+    host.innerHTML = confirmed.slice().sort((a, b) => a.slotTime.localeCompare(b.slotTime)).map(b =>
+      "<div class='booking-row'><div class='time'>" + b.slotTime + "</div>" +
+      "<div class='meta'><b>" + escapeHtml(b.customerName) + "</b><span>party of " + b.partySize + " · " + escapeHtml(b.customerEmail) + "</span></div>" +
+      "<div class='tbl'>" + escapeHtml(tableName(b.diningTableId)) + "</div>" +
+      "<button data-book='" + b.id + "'>Manage</button></div>"
+    ).join("");
+    host.querySelectorAll("[data-book]").forEach(btn => btn.addEventListener("click", () => openDetail(btn.getAttribute("data-book"))));
+  }
+
+  /* ---- Panel ---- */
+  function showPanel() { $("#panel").classList.add("show"); $("#panel").setAttribute("aria-hidden", "false"); $("#scrim").classList.add("show"); }
+  function hidePanel() { $("#panel").classList.remove("show"); $("#panel").setAttribute("aria-hidden", "true"); $("#scrim").classList.remove("show"); }
+
+  function openBookingForm(tableId, slot) {
+    const table = TABLES.find(t => t.id === tableId);
+    $("#panelBody").innerHTML =
+      "<h3>New reservation</h3>" +
+      "<p class='slotline'>" + escapeHtml(table.name) + " · " + slot + " · " + prettyDate(currentDate).full + "</p>" +
+      "<div class='field'><label for='fName'>Guest name</label><input type='text' id='fName' maxlength='100' autocomplete='off'><div class='err' id='eName'></div></div>" +
+      "<div class='field'><label for='fEmail'>Email</label><input type='email' id='fEmail' autocomplete='off'><div class='err' id='eEmail'></div></div>" +
+      "<div class='field'><label for='fParty'>Party size <span class='hint'>(1–" + table.capacity + ")</span></label><input type='number' id='fParty' min='1' max='" + table.capacity + "' value='2'><div class='err' id='eParty'></div></div>" +
+      "<div class='actions'><button class='btn-primary' id='doBook'>Confirm reservation</button></div>";
+    showPanel();
+    setTimeout(() => { const n = $("#fName"); if (n) n.focus(); }, 60);
+    $("#doBook").addEventListener("click", async () => {
+      const req = { diningTableId: tableId, bookingDate: currentDate, slotTime: slot, partySize: Number($("#fParty").value), customerName: $("#fName").value, customerEmail: $("#fEmail").value };
+      $("#eName").textContent = ""; $("#eEmail").textContent = ""; $("#eParty").textContent = "";
+      try {
+        await api.createBooking(req);
+        hidePanel(); await render();
+        toast(req.customerName.trim() + " booked for " + slot + ".");
+      } catch (err) {
+        if (err.status === 409) { hidePanel(); await render(); toast(err.message, true); return; }
+        const m = err.message || "Could not book.";
+        if (m.toLowerCase().indexOf("party") >= 0) $("#eParty").textContent = m;
+        else if (m.toLowerCase().indexOf("email") >= 0) $("#eEmail").textContent = m;
+        else if (m.toLowerCase().indexOf("name") >= 0) $("#eName").textContent = m;
+        else toast(m, true);
+      }
+    });
+  }
+
+  async function openDetail(bookingId) {
+    const b = STORE.find(x => x.id === bookingId) || (await api.listBookings(currentDate)).find(x => x.id === bookingId);
+    if (!b) { toast("That reservation is no longer here.", true); await render(); return; }
+    const table = TABLES.find(t => t.id === b.diningTableId) || { name: tableName(b.diningTableId) };
+    $("#panelBody").innerHTML =
+      "<h3>" + escapeHtml(b.customerName) + "</h3>" +
+      "<p class='slotline'><span class='confirmed-chip'>Confirmed</span></p>" +
+      "<div class='detail-line'><span>Table</span><span>" + escapeHtml(table.name) + "</span></div>" +
+      "<div class='detail-line'><span>Date</span><span>" + prettyDate(b.bookingDate).full + "</span></div>" +
+      "<div class='detail-line'><span>Time</span><span>" + b.slotTime + "</span></div>" +
+      "<div class='detail-line'><span>Party</span><span>" + b.partySize + " guests</span></div>" +
+      "<div class='detail-line'><span>Email</span><span>" + escapeHtml(b.customerEmail) + "</span></div>" +
+      "<div class='actions'><button class='btn-danger' id='doCancel'>Cancel reservation</button></div>";
+    showPanel();
+    $("#doCancel").addEventListener("click", async () => { await api.cancelBooking(b.id); hidePanel(); await render(); toast("Reservation cancelled — the slot is free again."); });
+  }
+
+  /* ---- Toasts ---- */
+  function toast(msg, warn) {
+    const el = document.createElement("div");
+    el.className = "toast" + (warn ? " warn" : "");
+    el.textContent = msg;
+    $("#toasts").appendChild(el);
+    requestAnimationFrame(() => el.classList.add("show"));
+    setTimeout(() => { el.classList.remove("show"); setTimeout(() => el.remove(), 250); }, 2800);
+  }
+
+  /* ---- View toggle + date nav ---- */
+  function setView(v) {
+    currentView = v;
+    $("#floorView").hidden = v !== "floor";
+    $("#timelineView").hidden = v !== "timeline";
+    $("#viewFloor").classList.toggle("active", v === "floor");
+    $("#viewTimeline").classList.toggle("active", v === "timeline");
+    $("#viewFloor").setAttribute("aria-selected", v === "floor");
+    $("#viewTimeline").setAttribute("aria-selected", v === "timeline");
+  }
+  $("#viewFloor").addEventListener("click", () => setView("floor"));
+  $("#viewTimeline").addEventListener("click", () => setView("timeline"));
+
+  function shiftDay(delta) { const d = parseISODate(currentDate); d.setDate(d.getDate() + delta); currentDate = toISODate(d); render(); }
+  $("#prevDay").addEventListener("click", () => shiftDay(-1));
+  $("#nextDay").addEventListener("click", () => shiftDay(1));
+  $("#todayBtn").addEventListener("click", () => { currentDate = todayISO(); render(); });
+  $("#datePick").addEventListener("change", e => { if (e.target.value) { currentDate = e.target.value; render(); } });
+  $("#closePanel").addEventListener("click", hidePanel);
+  $("#scrim").addEventListener("click", hidePanel);
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hidePanel(); });
+
+  render();
+</script>
+</body>
+</html>
