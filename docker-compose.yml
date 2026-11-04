@@ -1,0 +1,36 @@
+# Starts the API and its PostgreSQL database with one command: docker compose up --build
+# Values come from your local .env file (copy .env.example to .env first).
+services:
+  # The PostgreSQL database
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    # Keep data between restarts in a named volume
+    volumes:
+      - booking_data:/var/lib/postgresql/data
+    # Lets the API wait until the database is actually ready for connections
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # The booking API, built from the Dockerfile in this repo
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Overrides the connection string in appsettings.json. "db" is the service name above.
+      ConnectionStrings__BookingDb: Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+    ports:
+      - "8080:8080"
+
+volumes:
+  booking_data:
