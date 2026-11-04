@@ -137,7 +137,7 @@ jobs:
       - name: Add the Seated demo app
         run: |
           mkdir -p site/app
-          cp web/index.html site/app/index.html
+          cp web/*.html web/*.css web/*.js site/app/
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
