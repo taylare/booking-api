@@ -1,0 +1,160 @@
+# Builds, tests and documents the booking API.
+#   - Every push and pull request: build and run the tests against a real PostgreSQL database.
+#   - Pushes to main: also publish the Swagger API docs to GitHub Pages.
+# One-time setup for the docs: repo Settings > Pages > Source: "GitHub Actions".
+name: CI and docs
+
+# When the workflow runs, what it may do, and shared settings
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Lets you run the workflow by hand from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Newer pull request pushes replace older runs. Runs on main are never cancelled halfway.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  DOTNET_VERSION: 10.0.x
+  # Throwaway credentials for the temporary CI database, which is deleted when the job ends
+  CI_DB_CONNECTION: Host=localhost;Port=5432;Database=booking_ci;Username=booking_ci;Password=ci_only_password
+
+jobs:
+  # Build the API and run every test against a real PostgreSQL server
+  test:
+    runs-on: ubuntu-latest
+
+    # A real PostgreSQL server that exists only while this job runs
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: booking_ci
+          POSTGRES_USER: booking_ci
+          POSTGRES_PASSWORD: ci_only_password
+        ports:
+          - 5432:5432
+        # Wait until PostgreSQL accepts connections before the steps start
+        options: >-
+          --health-cmd "pg_isready -U booking_ci -d booking_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      # Pull the repository code onto the runner
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore packages
+        run: dotnet restore tests/BookingApi.Tests
+
+      - name: Build
+        run: dotnet build tests/BookingApi.Tests --configuration Release --no-restore
+
+      # The tests read this variable to find the PostgreSQL service above
+      - name: Run tests against PostgreSQL
+        run: dotnet test tests/BookingApi.Tests --configuration Release --no-build --logger "console;verbosity=normal"
+        env:
+          TEST_DB_CONNECTION: ${{ env.CI_DB_CONNECTION }}
+
+  # Start the API, download its OpenAPI document and wrap it in a Swagger UI page.
+  # Only runs on main, after the tests have passed.
+  docs:
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: booking_ci
+          POSTGRES_USER: booking_ci
+          POSTGRES_PASSWORD: ci_only_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U booking_ci -d booking_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Build the API
+        run: dotnet build src/BookingApi --configuration Release
+
+      # The trailing & keeps the API running in the background while later steps use it
+      - name: Start the API in the background
+        run: |
+          dotnet run --project src/BookingApi --configuration Release --no-build > api.log 2>&1 &
+          echo $! > api.pid
+        env:
+          ASPNETCORE_URLS: http://localhost:5080
+          ConnectionStrings__BookingDb: ${{ env.CI_DB_CONNECTION }}
+
+      - name: Download the OpenAPI document from the running API
+        run: |
+          mkdir -p site
+          # Poll for up to two minutes: the API needs a moment to start and create its tables
+          for attempt in $(seq 1 60); do
+            if curl --silent --fail http://localhost:5080/openapi/v1.json --output site/openapi.json; then
+              echo "Downloaded the OpenAPI document on attempt ${attempt}"
+              break
+            fi
+            sleep 2
+          done
+          # Fail the job, and show the API log, if the document never arrived
+          test -s site/openapi.json || { echo "OpenAPI document was not downloaded"; cat api.log; exit 1; }
+
+      # Runs even if an earlier step failed, so the background process never lingers
+      - name: Stop the API
+        if: always()
+        run: kill "$(cat api.pid)" || true
+
+      - name: Add the Swagger UI page
+        run: cp docs/index.html site/index.html
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload the docs site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  # Publish the docs site to GitHub Pages
+  deploy:
+    needs: docs
+    runs-on: ubuntu-latest
+    # Permissions the Pages deployment needs
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # The live URL appears in the job summary
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
