@@ -290,6 +290,118 @@
 
     // Replaces the auto-generated placeholder values (such as slotTime 22:58:46.573Z) with valid ones,
     // so the pre-filled request body works the first time you press Execute
+    // Plain-English documentation layered onto the generated OpenAPI document:
+    // an overview, a description for each group of endpoints, each parameter, each response code and each field.
+    // Every lookup is guarded, so a missing part of the document is skipped instead of breaking the page.
+    function addDocumentation(spec) {
+      spec.info = spec.info || {};
+      spec.info.title = 'Booking API';
+      spec.info.description = [
+        'A RESTful API for restaurant table bookings. It lets a client list tables, check which one-hour slots are free, and create, view and cancel reservations.',
+        '',
+        '**Try it out is live on this page.** Requests are answered by a demo backend running in your browser using dummy data, so you can experiment freely. Nothing is saved on a server.',
+        '',
+        '### How a booking works',
+        '1. `GET /api/v1/tables` to see the tables and their capacity.',
+        '2. `GET /api/v1/tables/{tableId}/availability?date=YYYY-MM-DD` to see which slots are free.',
+        '3. `POST /api/v1/bookings` to reserve a free slot (returns `201`).',
+        '4. `DELETE /api/v1/bookings/{bookingId}` to cancel and free the slot.',
+        '',
+        '### Rules',
+        '- Slots are one hour long, on the hour, from **17:00 to 21:00**.',
+        '- The date cannot be in the past, and the party size must fit the table.',
+        '- A table can only hold one confirmed booking per slot. A clash returns **409 Conflict**.',
+        '',
+        '### Status codes',
+        '| Code | Meaning |',
+        '|---|---|',
+        '| 200 | OK, the data is in the response body |',
+        '| 201 | Created, the new booking is returned |',
+        '| 204 | Done, nothing to return (used when cancelling) |',
+        '| 400 | The request failed validation, the `errors` field says which field and why |',
+        '| 404 | The table or booking does not exist |',
+        '| 409 | The slot is already booked |'
+      ].join('\n');
+
+      spec.tags = [
+        { name: 'Tables', description: 'Read-only information about the restaurant tables and which slots are free.' },
+        { name: 'Bookings', description: 'Create, view, list and cancel reservations.' }
+      ];
+
+      // Parameter descriptions, matched by name wherever they appear
+      var parameterText = {
+        tableId: 'Id of the dining table, from GET /api/v1/tables (1 to 5 in the demo data).',
+        bookingId: 'Id of the booking, a GUID returned when the booking was created.',
+        date: 'A day written as YYYY-MM-DD, for example 2026-12-01.',
+        page: 'Page number, starting at 1. Defaults to 1.',
+        pageSize: 'Bookings per page, from 1 to 100. Defaults to 20.'
+      };
+      // Response descriptions by status code
+      var responseText = {
+        '200': 'OK. The requested data is in the response body.',
+        '201': 'Created. The new booking is returned and the Location header points to it.',
+        '204': 'Done. Nothing to return.',
+        '400': 'Validation failed. The errors field lists each invalid field and the reason.',
+        '404': 'Not found. The table or booking does not exist.',
+        '409': 'Conflict. That table is already booked for that day and slot.'
+      };
+
+      Object.keys(spec.paths || {}).forEach(function (route) {
+        var pathItem = spec.paths[route];
+        (pathItem.parameters || []).forEach(function (parameter) {
+          if (parameterText[parameter.name]) { parameter.description = parameterText[parameter.name]; }
+        });
+        Object.keys(pathItem).forEach(function (method) {
+          var operation = pathItem[method];
+          if (!operation || typeof operation !== 'object') { return; }
+          (operation.parameters || []).forEach(function (parameter) {
+            if (parameterText[parameter.name]) { parameter.description = parameterText[parameter.name]; }
+          });
+          Object.keys(operation.responses || {}).forEach(function (code) {
+            var response = operation.responses[code];
+            // Only replace the generic text the generator adds (such as "OK" or "Created")
+            if (responseText[code] && (!response.description || response.description.length < 25)) {
+              response.description = responseText[code];
+            }
+          });
+        });
+      });
+
+      // Field descriptions for the request and response models
+      var fieldText = {
+        CreateBookingRequest: {
+          diningTableId: 'Which table to book, from GET /api/v1/tables.',
+          bookingDate: 'Day of the booking, YYYY-MM-DD. Cannot be in the past.',
+          slotTime: 'Start of the one-hour slot, on the hour between 17:00:00 and 21:00:00.',
+          partySize: 'Number of guests, from 1 up to the table capacity.',
+          customerName: 'Guest name, required, up to 100 characters.',
+          customerEmail: 'Guest email address, required, must be a valid address.'
+        },
+        BookingResponse: {
+          id: 'Unique id of the booking.',
+          status: 'Confirmed while the booking holds the slot, Cancelled once it has been cancelled.',
+          createdAtUtc: 'When the booking was made, in UTC.'
+        },
+        DiningTableResponse: {
+          id: 'Table id used in other requests.',
+          name: 'Display name of the table.',
+          capacity: 'Largest party the table seats.'
+        },
+        AvailabilityResponse: {
+          availableSlots: 'Slot start times that are still free for this table and day.'
+        }
+      };
+      var schemas = (spec.components && spec.components.schemas) || {};
+      Object.keys(fieldText).forEach(function (schemaName) {
+        var schema = schemas[schemaName];
+        if (!schema || !schema.properties) { return; }
+        Object.keys(fieldText[schemaName]).forEach(function (field) {
+          if (schema.properties[field]) { schema.properties[field].description = fieldText[schemaName][field]; }
+        });
+      });
+      return spec;
+    }
+
     function addExamples(spec) {
       var request = spec.components && spec.components.schemas && spec.components.schemas.CreateBookingRequest;
       if (request && request.properties) {
@@ -316,7 +428,7 @@
         .then(function (response) { return response.json(); })
         .then(function (spec) {
           window.ui = SwaggerUIBundle({
-            spec: addExamples(spec),
+            spec: addDocumentation(addExamples(spec)),
             dom_id: '#swagger-ui',
             // Try it out is switched on from the start: calls are answered by the demo backend above
             tryItOutEnabled: true,

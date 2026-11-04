@@ -88,6 +88,7 @@ public static class BookingEndpoints
             })
             .WithName("CreateBooking")
             .WithSummary("Create a booking for a table, day and slot")
+            .WithDescription("Reserves one table for one hour. The slot must be on the hour between 17:00 and 21:00, the date cannot be in the past, and the party size must fit the table. Returns 201 with a Location header pointing at the new booking. If the table is already booked for that slot the API returns 409 Conflict, and the database guarantees this even when two requests arrive at the same moment.")
             .Produces<BookingResponse>(StatusCodes.Status201Created)
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status409Conflict);
@@ -105,6 +106,7 @@ public static class BookingEndpoints
             })
             .WithName("GetBooking")
             .WithSummary("Get one booking by id")
+            .WithDescription("Returns a single booking, including its status (Confirmed or Cancelled). Returns 404 if the id does not exist.")
             .Produces<BookingResponse>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound);
 
@@ -148,6 +150,7 @@ public static class BookingEndpoints
             })
             .WithName("ListBookings")
             .WithSummary("List bookings, optionally for one day, with paging")
+            .WithDescription("Returns bookings sorted by date and slot time. Pass date to see one day only. Results are paged: page starts at 1 and pageSize can be 1 to 100 (default 20). The response includes totalCount so a client knows how many pages exist.")
             .Produces<PagedResponse<BookingResponse>>(StatusCodes.Status200OK)
             .ProducesValidationProblem();
 
@@ -173,6 +176,7 @@ public static class BookingEndpoints
             })
             .WithName("CancelBooking")
             .WithSummary("Cancel a booking and free its slot")
+            .WithDescription("Marks the booking as Cancelled and frees the table for that slot so it can be booked again. The record is kept for history (a soft delete). Safe to repeat: cancelling an already cancelled booking still returns 204. Returns 404 if the id does not exist.")
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound);
 

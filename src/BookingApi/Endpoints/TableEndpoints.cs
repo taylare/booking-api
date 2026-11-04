@@ -28,6 +28,7 @@ public static class TableEndpoints
             })
             .WithName("ListTables")
             .WithSummary("List all dining tables")
+            .WithDescription("Returns every table in the restaurant with its id, name and seat capacity. Call this first: the id is needed to check availability and to create a booking, and the capacity is the largest party the table accepts.")
             .Produces<List<DiningTableResponse>>(StatusCodes.Status200OK);
 
         // GET /api/v1/tables/{tableId}/availability?date=2026-12-01
@@ -65,6 +66,7 @@ public static class TableEndpoints
             })
             .WithName("GetAvailability")
             .WithSummary("List the free slots for a table on a given day")
+            .WithDescription("Returns the hourly slots (17:00 to 21:00) that are still free for one table on one day. Cancelled bookings do not hold a slot. The date query parameter is required, and an unknown table returns 404.")
             .Produces<AvailabilityResponse>(StatusCodes.Status200OK)
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status404NotFound);
