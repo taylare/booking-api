@@ -1466,3 +1466,165 @@ select {
   padding: 0.7rem;
   margin-top: 0.4rem;
 }
+
+/* ===== Mobile and touch =====
+   Everything here sits inside media queries, so the desktop layout is untouched.
+   Phones: 640px and narrower. Touch screens: pointer is coarse. */
+
+@media (max-width: 640px) {
+  /* Page: slightly tighter gutters and header */
+  .wrap {
+    padding-left: max(14px, env(safe-area-inset-left, 0px));
+    padding-right: max(14px, env(safe-area-inset-right, 0px));
+  }
+
+  /* Tabs: three equal buttons, with the guest page link on its own full-width row */
+  .tabs { gap: 0.3rem; margin-top: 1rem; }
+
+  .tabs .tab { flex: 1; text-align: center; padding: 0.6rem 0.4rem; }
+
+  .tabs .spacer { display: none; }
+
+  .tabs .link-btn { flex: 1 0 100%; text-align: center; }
+
+  /* Date bar: label on its own line, then the buttons and date picker share the next one */
+  .datebar .daylabel { flex: 1 0 100%; margin-right: 0; }
+
+  .datebar input[type="date"] { flex: 1; min-width: 0; }
+
+  /* Summary tiles: keep all three in one row instead of stacking tall cards */
+  .tiles { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+
+  .tile { padding: 0.75rem 0.7rem; }
+
+  .tile .big { font-size: 1.5rem; }
+
+  .tile .lbl { font-size: 0.62rem; letter-spacing: 0.04em; }
+
+  .tile .delta { font-size: 0.68rem; }
+
+  /* Sitting buttons: scroll sideways in one row rather than wrapping into a ragged block */
+  .sittings {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    max-width: 100%;
+    padding-bottom: 0.2rem;
+    scrollbar-width: none;
+  }
+
+  .sittings::-webkit-scrollbar { display: none; }
+
+  .sittings .lead { display: none; }
+
+  .slotbtn { flex-shrink: 0; }
+
+  .controls .viewtoggle { width: 100%; }
+
+  .controls .viewtoggle button { flex: 1; }
+
+  /* Floor plan: a squarer room so tables are big enough to read and tap */
+  .room { aspect-ratio: 5 / 4; border-radius: 16px; }
+
+  .table .body .nm { font-size: 0.72rem; }
+
+  .table .body .st { font-size: 0.62rem; }
+
+  .zone { font-size: 0.5rem; }
+
+  /* Reservation and waitlist rows: name and time on top, table, status and action below */
+  .booking-row { gap: 0.5rem 0.75rem; padding: 0.8rem; }
+
+  .booking-row .time { min-width: 2.9rem; }
+
+  .booking-row .meta { flex: 1 1 calc(100% - 4rem); }
+
+  .booking-row .tbl,
+  .booking-row .row-actions { margin-left: 3.65rem; }
+
+  .booking-row > button:last-child { margin-left: auto; }
+
+  .row-actions { flex: 1; }
+
+  .row-actions button { flex: 1; }
+
+  /* Side panel: full width sheet that respects the notch and home bar */
+  .panel {
+    width: 100%;
+    height: 100dvh;
+    padding: 1.2rem;
+    padding-top: calc(1.2rem + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(1.6rem + env(safe-area-inset-bottom, 0px));
+    border-left: none;
+  }
+
+  .mini-stats { grid-template-columns: repeat(2, 1fr); }
+
+  .mini-stats span { letter-spacing: 0.04em; }
+
+  .detail-line { gap: 0.6rem; }
+
+  /* Guests tab: search on its own line, tag filters scroll sideways */
+  .toolbar input[type="text"] { max-width: none; flex: 1 0 100%; }
+
+  .filter-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    max-width: 100%;
+    scrollbar-width: none;
+  }
+
+  .filter-pills::-webkit-scrollbar { display: none; }
+
+  .filter-pills button { flex-shrink: 0; }
+
+  .guest-grid { grid-template-columns: 1fr; }
+
+  /* Insights: charts fit narrow cards */
+  .insight-grid { grid-template-columns: 1fr; }
+
+  .hbar-row { grid-template-columns: 4.6rem 1fr 2.4rem; }
+
+  /* Fields: 16px text stops iOS Safari zooming the page when a field is focused */
+  input[type="date"],
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  textarea,
+  select { font-size: 1rem; }
+
+  /* Guest booking page */
+  .card { padding: 1rem; }
+
+  .slot-grid { grid-template-columns: repeat(3, 1fr); }
+
+  .confirm-card .ref { font-size: 1.25rem; }
+
+  .toasts { max-width: calc(100vw - 28px); }
+}
+
+/* Very narrow phones (iPhone SE, small Androids) */
+@media (max-width: 360px) {
+  .tile .big { font-size: 1.3rem; }
+
+  .tile .lbl { font-size: 0.58rem; }
+
+  .wordmark { font-size: 1.6rem; }
+}
+
+/* Touch screens: comfortable tap targets of at least 44px */
+@media (pointer: coarse) {
+  button,
+  .link-btn { min-height: 44px; }
+
+  .tag-toggles button,
+  .filter-pills button { min-height: 40px; }
+
+  .closex { width: 2.75rem; height: 2.75rem; }
+
+  .note-meta button { min-height: 0; padding: 0.4rem 0; }
+
+  .stepper button { width: 2.75rem; height: 2.75rem; }
+
+  .table.free:hover .body,
+  .table.reserved:hover .body { transform: none; }
+}
